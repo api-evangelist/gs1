@@ -1,0 +1,168 @@
+aid: gs1
+url: https://raw.githubusercontent.com/api-evangelist/gs1/refs/heads/main/apis.yml
+name: GS1
+kind: company
+description: >-
+  GS1 (GS1 AISBL) is the not-for-profit, neutral standards body headquartered at Avenue Louise 523, 1050
+  Brussels, Belgium, that maintains the identification keys and data standards the rest of the supply chain
+  hangs its transactions on — GTIN, GLN, SSCC, GINC and GSIN, the barcode and EPC/RFID capture standards,
+  EPCIS and the Core Business Vocabulary for supply chain visibility events, GS1 Digital Link, and EANCOM,
+  GS1's own subset of UN/EDIFACT. GS1 does not run a commercial logistics service; it sits underneath every
+  party in the chain, defining the identifiers a shipper, forwarder, carrier, terminal, customs authority and
+  last-mile network all quote at each other. Its API posture is unusually open for a standards body: the full
+  standards library is downloadable free as PDF from ref.gs1.org with no login, EPCIS 2.0.1 ships a normative
+  OpenAPI 3.0.3 REST binding plus JSON Schema, XSD, WSDL, SHACL and JSON-LD ontologies, and GS1 AISBL itself
+  operates a live, unauthenticated GS1-Conformant Resolver at id.gs1.org. What is gated is the other half —
+  issuing GS1 identifiers and querying the Verified by GS1 registry are federated to national GS1 Member
+  Organisations and sold under paid membership or a commercial API subscription, not offered self-serve by
+  the Global Office.
+image: https://ref.gs1.org/favicon-196x196.png
+tags:
+- Logistics
+- Supply Chain
+- Belgium
+- Standards
+- Track and Trace
+- Traceability
+- Identifiers
+- Barcodes
+- Freight Forwarding
+- Retail
+created: '2026-07-30'
+modified: '2026-07-30'
+specificationVersion: '0.23'
+apis:
+- aid: gs1:gs1-epcis-2-0-rest-api
+  name: GS1 EPCIS 2.0 REST API
+  description: >-
+    The normative REST binding of the GS1 EPCIS 2.0 standard — the sector's supply chain visibility event
+    interface, describing what happened to an object, when, where and why, using Core Business Vocabulary
+    terms. GS1 publishes the contract (OpenAPI 3.0.3, 29 paths) rather than hosting a repository: capture
+    (POST /capture), query (GET /events plus resource-scoped views by epc, bizStep, bizLocation, readPoint,
+    disposition and eventType), named queries (POST /queries), and mandatory webhook subscriptions
+    (POST /queries/{queryName}/subscriptions) where the client supplies a `dest` callback URL and a
+    signatureToken the server echoes back in a GS1-Signature header. Implementers host their own base URL;
+    the specification declares no `servers` block.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  tags:
+  - EPCIS
+  - Supply Chain Visibility
+  - Track and Trace
+  - Traceability
+  - Events
+  - Standards
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-epcis-2-0-1-openapi.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-digital-link-resolver
+  name: GS1 Digital Link Resolver (id.gs1.org)
+  description: >-
+    GS1 AISBL's own live, unauthenticated GS1-Conformant Resolver, implementing the GS1-Conformant Resolver
+    Standard 1.2.0. It takes a GS1 Digital Link URI built from a GS1 identification key and returns either a
+    303 redirect to the brand owner's target resource or, on request, an RFC 9264 linkset enumerating every
+    registered link type for that key. The resolver description document at /.well-known/gs1resolver declares
+    the supported primary keys — 00 (SSCC), 01 (GTIN), 253 (GDTI), 255 (GCN), 401 (GINC), 402 (GSIN),
+    414/415/417 (GLN), 8003 (GRAI), 8004 (GIAI), 8006 (ITIP), 8010 (CPID), 8013 (GMN) and 8017/8018 (GSRN) —
+    which includes the consignment and shipment keys logistics parties actually quote. No key, no signup and
+    no contract is required to call it.
+  humanURL: https://ref.gs1.org/standards/resolver/
+  baseURL: https://id.gs1.org
+  tags:
+  - GS1 Digital Link
+  - Resolver
+  - Identifiers
+  - Linked Data
+  - Track and Trace
+  - Standards
+  properties:
+  - type: Specification
+    url: https://ref.gs1.org/standards/resolver/1.2.0/
+  - type: JSONSchema
+    url: json-schema/gs1-resolver-linkset-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-resolver-description-file-schema.json
+  - type: WellKnown
+    url: well-known/gs1-resolver-description.json
+  - type: JSONLD
+    url: json-ld/gs1-resolver-linkset-context.jsonld
+  - type: Vocabulary
+    url: json-ld/gs1-web-vocabulary-linktypes.json
+  - type: Documentation
+    url: https://www.gs1.org/standards/gs1-digital-link
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/resolver/artefacts
+  - type: TestSuite
+    url: https://ref.gs1.org/test-suites/resolver/
+  - type: SourceCode
+    url: https://github.com/gs1/GS1_DigitalLink_Resolver_CE
+common:
+- type: IssueTracker
+  url: https://github.com/gs1/EPCIS/issues
+- type: CodeOfConduct
+  url: https://github.com/gs1/EPCIS/blob/master/CODE_OF_CONDUCT.md
+- type: Website
+  url: https://www.gs1.org/
+- type: Documentation
+  url: https://ref.gs1.org/
+- type: SpecificationsRepository
+  url: https://ref.gs1.org/standards/
+  name: GS1 standards repository — every ratified standard, free PDF, no login
+- type: GitHubOrganization
+  url: https://github.com/gs1
+- type: Vocabulary
+  url: https://ref.gs1.org/voc/
+  name: GS1 Web Vocabulary (JSON-LD and Turtle ontologies)
+- type: Governance
+  url: https://www.gs1.org/standards/development-work-groups
+  name: Global Standards Management Process (GSMP) work groups
+- type: Standard
+  url: https://ref.gs1.org/standards/genspecs/
+  name: GS1 General Specifications 26.0.0
+- type: Standard
+  url: https://ref.gs1.org/standards/digital-link/uri-syntax/
+  name: GS1 Digital Link URI Syntax 1.4.0
+- type: Standard
+  url: https://ref.gs1.org/standards/cbv/
+  name: Core Business Vocabulary (CBV) 2.0.0
+- type: Standard
+  url: https://ref.gs1.org/standards/eancom/
+  name: EANCOM 2022 — GS1 subset of UN/EDIFACT
+- type: Standard
+  url: https://ref.gs1.org/standards/edi-business-terms/
+  name: GS1 EDI Business Terms 1.0.0
+- type: Standard
+  url: https://ref.gs1.org/standards/logistics-interoperability/
+  name: GS1 Logistics Interoperability Model 1.1.1
+- type: Standard
+  url: https://ref.gs1.org/standards/tds/
+  name: EPC Tag Data Standard (TDS) 2.3.0
+- type: Standard
+  url: https://ref.gs1.org/standards/gdm/
+  name: GS1 Global Data Model 2.17.0
+- type: Tools
+  url: https://ref.gs1.org/tools/gs1-barcode-syntax-resource/
+  name: GS1 Barcode Syntax Resource (Dictionary, Tests, Engine)
+- type: Registry
+  url: https://www.gs1.org/services/verified-by-gs1
+  name: Verified by GS1 — global registry lookup (web UI; APIs sold by Member Organisations)
+- type: Industry
+  url: https://www.gs1.org/industries/transport-and-logistics
+- type: LinkedIn
+  url: https://www.linkedin.com/company/gs1
+maintainers:
+- FN: Kin Lane
+  email: kin@apievangelist.com

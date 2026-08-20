@@ -1,0 +1,357 @@
+aid: gs1
+name: GS1
+review:
+  question: >-
+    Does GS1 — the horizontal identification standards body for commerce and supply chain — publish
+    machine-readable, freely reachable API contracts that another party in a shipment chain can implement,
+    and does GS1 itself operate any callable surface?
+  answer: true
+  date: '2026-07-30'
+  reviewer: API Evangelist
+  tier: industry-body-standards
+  cohort: freight-platforms
+  domainVerified: true
+  domainNote: >-
+    gs1.org and www.gs1.org both resolve 200 (www.gs1.org redirects to /home). The organization is GS1 AISBL.
+    Its Brussels address was confirmed independently from GS1's own machine-readable resolver description
+    document at https://id.gs1.org/.well-known/gs1resolver (HTTP 200, application/json), which carries
+    "contact": {"fn": "GS1 AISBL", "hasAddress": {"streetAddress": "Avenue Louise 523", "locality":
+    "Brussels", "country-name": "Belgium", "postal-code": "1050"}}. Home country Belgium confirmed.
+    ref.gs1.org is the persistent standards repository; id.gs1.org is the live resolver. There is no
+    developer.gs1.org (NXDOMAIN) and api.gs1.org does not answer.
+
+findings:
+  summary: >-
+    GS1 is a standards body, not a service operator, and it is one of the most openly published standards
+    bodies in this sector. The entire standards library is downloadable free as PDF from ref.gs1.org with no
+    account, no membership check and no click-through — https://ref.gs1.org/standards/genspecs/ returns
+    application/pdf 200 directly. EPCIS 2.0.1 ships a normative OpenAPI 3.0.3 document (351 KB, 29 paths) at
+    https://ref.gs1.org/standards/epcis/openapi.json alongside JSON Schema, XSD, WSDL, SHACL and JSON-LD
+    ontologies, and the same file is mirrored in the public gs1/EPCIS GitHub repo. GS1 also runs a real
+    callable surface itself: id.gs1.org, the GS1 AISBL GS1-Conformant Resolver, answers unauthenticated GS1
+    Digital Link requests and returns RFC 9264 linksets. What is NOT open is the commercial half — obtaining
+    GS1 identifier prefixes (GTIN/GLN/SSCC) and querying the Verified by GS1 registry programmatically are
+    federated to national GS1 Member Organisations and sold under membership or paid API subscription
+    (GS1 US publishes an API add-on price; GS1 UK issues a 20-character access key). The Global Office
+    publishes no self-serve commercial API of its own.
+  organizationType: standards-body
+  legalEntity: GS1 AISBL (association internationale sans but lucratif)
+  headquarters: Avenue Louise 523, 1050 Brussels, Belgium
+  secondaryOffice: Princeton, New Jersey, United States (per github.com/gs1 org profile)
+  governance: >-
+    Standards are developed and ratified through the Global Standards Management Process (GSMP), run as
+    work groups open to GS1 members. Work group participation is behind a login (GS1 Community Room /
+    GS1 Xchange) — https://www.gs1.org/standards/development-work-groups (HTTP 200). Output is governed by
+    a Management Board. Standards themselves are published openly; participation in writing them is not.
+
+interoperability:
+  standardConformance:
+    role: >-
+      GS1 is the publisher of these standards, not an implementer of someone else's. Conformance is
+      recorded here as "what GS1 normatively defines and versions".
+    standards:
+    - name: GS1 EPCIS
+      version: 2.0.1
+      evidence: https://ref.gs1.org/standards/epcis/2.0.1/
+      httpStatus: 200
+      machineReadable: true
+      note: Supply chain visibility event standard; REST binding published as OpenAPI 3.0.3.
+    - name: GS1 Core Business Vocabulary (CBV)
+      version: 2.0.0
+      evidence: https://ref.gs1.org/standards/cbv/
+      httpStatus: 200
+      machineReadable: true
+      note: Event vocabulary (bizStep, disposition, bizTransaction types) used with EPCIS; JSON-LD + Turtle ontologies published.
+    - name: GS1-Conformant Resolver Standard
+      version: 1.2.0 (ratified January 2026)
+      evidence: https://ref.gs1.org/standards/resolver/1.2.0/
+      httpStatus: 200
+      machineReadable: true
+      note: Normative JSON Schemas for the linkset and the /.well-known/gs1resolver description file.
+    - name: GS1 Digital Link URI Syntax
+      version: 1.4.0
+      evidence: https://ref.gs1.org/standards/digital-link/uri-syntax/
+      httpStatus: 200
+      machineReadable: partial
+    - name: GS1 General Specifications (GENSPECS)
+      version: 26.0.0
+      evidence: https://ref.gs1.org/standards/genspecs/
+      httpStatus: 200
+      machineReadable: false
+      note: PDF only — the foundational document defining the identification keys and Application Identifiers.
+    - name: GS1 EANCOM
+      version: '2022'
+      evidence: https://ref.gs1.org/standards/eancom/
+      httpStatus: 200
+      machineReadable: false
+      note: GS1's own subset of UN/EDIFACT. Distributed as a ZIP of documents plus code lists in Excel/OOXML.
+    - name: GS1 EDI Business Terms
+      version: 1.0.0
+      evidence: https://ref.gs1.org/standards/edi-business-terms/
+      httpStatus: 200
+    - name: GS1 Logistics Interoperability Model (LIM)
+      version: 1.1.1
+      evidence: https://ref.gs1.org/standards/logistics-interoperability/
+      httpStatus: 200
+      machineReadable: false
+      note: The transport-and-logistics-facing model; PDF only.
+    - name: EPC Tag Data Standard (TDS)
+      version: 2.3.0
+      evidence: https://ref.gs1.org/standards/tds/
+      httpStatus: 200
+    - name: GS1 Global Data Model (GDM)
+      version: 2.17.0
+      evidence: https://ref.gs1.org/standards/gdm/
+      httpStatus: 200
+      note: Published as a spreadsheet (OOXML), not as a schema.
+    - name: GS1 Global Product Classification (GPC)
+      version: '2026-05'
+      evidence: https://ref.gs1.org/standards/gpc/2026-05/
+      httpStatus: 200
+      note: Published as an 11 MB ZIP.
+    relationToOtherSectorStandards: >-
+      GS1 does not implement DCSA, IATA ONE Record, the WCO Data Model or UN/CEFACT — it is the peer body
+      whose identification keys those models reference. GS1's own EDI lineage is UN/EDIFACT via EANCOM.
+      No reference to ANSI X12, eFTI, MLETR/eBL or NMFTA was found in the GS1 standards repository index.
+
+  interfaceShape: open-standard
+  interfaceShapeEvidence: >-
+    Both surfaces are open standards by construction. The EPCIS 2.0.1 OpenAPI declares no `servers` block —
+    it is a contract for others to host, and multiple independent EPCIS repositories implement it. The
+    resolver standard explicitly anticipates many conformant resolvers on the Web and publishes a test suite
+    (https://ref.gs1.org/test-suites/resolver/, HTTP 200) so an implementation's conformance can be assessed.
+    Nothing proprietary or GS1-only sits in either contract.
+
+  identifierScheme: >-
+    GS1 identification keys — GTIN (AI 01), SSCC (00), GLN (414/415/417), GDTI (253), GCN (255), GINC (401),
+    GSIN (402), GRAI (8003), GIAI (8004), ITIP (8006), CPID (8010), GMN (8013), GSRN (8017/8018) — expressed
+    as GS1 Application Identifier element strings, EPC URIs, or GS1 Digital Link URIs. The consignment (GINC)
+    and shipment (GSIN) keys plus SSCC are the ones a forwarder, carrier or terminal quotes at each other.
+    UN/ECE Recommendation 20 unit codes are referenced for quantities. Link relation types come from the GS1
+    Web Vocabulary (https://ref.gs1.org/voc/, 60 link types harvested to json-ld/).
+  identifierSchemeEvidence: >-
+    Verified from the live resolver description document, "supportedPrimaryKeys": ["00","01","253","255",
+    "401","402","414","415","417","8003","8004","8006","8010","8013","8017","8018"] —
+    https://id.gs1.org/.well-known/gs1resolver (HTTP 200).
+
+  eventModel: webhook-and-polling
+  eventModelEvidence: >-
+    EPCIS 2.0 makes webhook subscriptions mandatory, not optional. The OpenAPI operation
+    POST /queries/{queryName}/subscriptions carries the description "EPCIS 2.0 implementations must support
+    Webhook subscriptions" and requires the client to supply a `dest` callback endpoint plus an optional
+    client-generated `signatureToken`; the server signs its callbacks and places the signature in a
+    `GS1-Signature` HTTP header. The subscription body is a oneOf over QueryStreamSubscription
+    (stream: true — notify on every matching event) and QueryScheduleSubscription (cron-style schedule with
+    a reportIfEmpty flag). Polling is also fully specified: GET /events, GET /queries/{queryName}/events,
+    and resource-scoped reads under /epcs, /bizSteps, /bizLocations, /readPoints, /dispositions and
+    /eventTypes, with cursoring via /nextPageToken/{token}. Source:
+    openapi/gs1-epcis-2-0-1-openapi.json (harvested from https://ref.gs1.org/standards/epcis/openapi.json,
+    HTTP 200, 2026-07-30). The Digital Link resolver is request/response only — not applicable there.
+
+  ediLegacy: >-
+    Deep and current, not vestigial. EANCOM — GS1's own subset of UN/EDIFACT — is a live, maintained GS1
+    standard whose current release is EANCOM 2022, last modified 8 September 2025, sitting alongside GS1 XML
+    and the GS1 EDI Business Terms 1.0.0 standard. GS1 defines the message content, not the transport: no
+    VAN, AS2 or mapping-project requirement is imposed by GS1 itself, and the artefacts are shipped as a ZIP
+    of documents plus code lists in Excel and OOXML rather than as schemas. So the modern REST/JSON path
+    (EPCIS 2.0, Digital Link) genuinely coexists with the EDIFACT path in the standards catalogue — this is
+    a body that maintains both, rather than a REST veneer over EDI.
+  ediEvidence:
+  - url: https://ref.gs1.org/standards/eancom/
+    httpStatus: 200
+    contentType: application/zip
+  - url: https://ref.gs1.org/standards/eancom/artefacts
+    httpStatus: 200
+  - url: https://ref.gs1.org/standards/edi-business-terms/
+    httpStatus: 200
+
+  multiPartyPosture: >-
+    GS1 publishes outward to every party in the chain and consumes from none of them. Anyone — shipper,
+    forwarder, carrier, terminal, customs broker, software vendor, or an agent — can download the full
+    specification set and call id.gs1.org without registering, and the model is deliberately
+    implement-once-integrate-with-everyone. The federation is where the gate sits: identifier issuance and
+    the Verified by GS1 registry are delegated to national GS1 Member Organisations, each of which sets its
+    own membership fee and its own API commercial terms, so a developer wanting registry data negotiates
+    with a country office rather than with Brussels. There is no partner directory or marketplace of
+    pre-built integrations published by the Global Office; the public gs1 GitHub organisation (34 public
+    repos) plus a resolver conformance test suite are what GS1 offers implementers instead.
+
+  accessGate: self-serve
+  accessGateDetail: >-
+    For everything GS1 Global Office itself publishes, there is nothing to sign. Specifications, OpenAPI,
+    JSON Schemas, ontologies and test suites are anonymous HTTP GETs off ref.gs1.org and github.com/gs1, and
+    id.gs1.org accepts unauthenticated requests — the EPCIS OpenAPI declares no securitySchemes and no
+    top-level security requirement at all, leaving authentication to the implementer. Two things are gated
+    and must be stated plainly: (1) participating in GSMP work groups requires a GS1 Community Room /
+    GS1 Xchange login, and (2) programmatic access to the Verified by GS1 registry, and any GS1 identifier
+    prefix, requires paid membership or a commercial API subscription with a national Member Organisation
+    (GS1 US sells an API add-on subscription; GS1 UK issues a 20-character access key to its GTIN Check
+    service). Those are Member Organisation surfaces, out of scope for this Global Office profile and not
+    listed in apis[].
+  gated: false
+
+  standardsBodySpecifics:
+    freelyDownloadable: >-
+      Yes, and without friction. The full standards repository at https://ref.gs1.org/standards/ (HTTP 200)
+      lists every ratified standard with a current version, an archive and, for many, a separate artefacts
+      page. Requesting a standard's persistent URI returns the file directly — genspecs and TDS return
+      application/pdf, EANCOM returns application/zip, GDM returns an OOXML spreadsheet, GPC returns an
+      11 MB ZIP. No paywall, no account, no click-through licence was encountered on any probe.
+    memberGatedOrSold: >-
+      None of the specifications. What is member-gated is standards *development* (Community Room login) and
+      the commercial registry/identifier services run by Member Organisations.
+    machineReadableArtifacts:
+    - artifact: EPCIS 2.0.1 REST Bindings OpenAPI 3.0.3
+      url: https://ref.gs1.org/standards/epcis/openapi.json
+      httpStatus: 200
+      bytes: 351201
+      saved: openapi/gs1-epcis-2-0-1-openapi.json
+    - artifact: EPCIS JSON Schema (draft-07)
+      url: https://ref.gs1.org/standards/epcis/epcis-json-schema.json
+      httpStatus: 200
+      saved: json-schema/gs1-epcis-json-schema.json
+    - artifact: EPCIS SimpleEventQuery JSON Schema (draft-07)
+      url: https://ref.gs1.org/standards/epcis/query-schema.json
+      httpStatus: 200
+      saved: json-schema/gs1-epcis-query-schema.json
+    - artifact: GS1-Conformant Resolver linkset JSON Schema (draft-07)
+      url: https://ref.gs1.org/standards/resolver/linkset-schema
+      httpStatus: 200
+      saved: json-schema/gs1-resolver-linkset-schema.json
+    - artifact: Resolver Description File JSON Schema (draft-07)
+      url: https://ref.gs1.org/standards/resolver/description-file-schema
+      httpStatus: 200
+      saved: json-schema/gs1-resolver-description-file-schema.json
+    - artifact: Resolver linkset JSON-LD context
+      url: https://ref.gs1.org/standards/resolver/linkset-context
+      httpStatus: 200
+      saved: json-ld/gs1-resolver-linkset-context.jsonld
+    - artifact: GS1 Web Vocabulary link types (60 entries)
+      url: https://ref.gs1.org/voc/data/linktypes
+      httpStatus: 200
+      saved: json-ld/gs1-web-vocabulary-linktypes.json
+    - artifact: GS1 AISBL resolver description document (live)
+      url: https://id.gs1.org/.well-known/gs1resolver
+      httpStatus: 200
+      saved: well-known/gs1-resolver-description.json
+    machineReadableNotHarvested:
+    - EPCIS SOAP/WSDL binding, XSDs (epcglobal-epcis-2_0.xsd and siblings), SHACL, and the EPCIS/CBV JSON-LD and Turtle ontologies — all listed at https://ref.gs1.org/standards/epcis/artefacts (HTTP 200), not saved here because the REST binding is the API surface under review.
+    - GS1 Web Vocabulary full ontology (JSON-LD and Turtle) at https://ref.gs1.org/voc/ — vocabulary, not an interface contract.
+    - GS1 Barcode Syntax Dictionary and Syntax Tests at https://ref.gs1.org/tools/gs1-barcode-syntax-resource/ and https://github.com/gs1/gs1-syntax-dictionary — validation resources, not an API.
+    pdfOnlyFindings: >-
+      The foundational documents are PDF-only. GS1 General Specifications 26.0.0, the GS1 Logistics
+      Interoperability Model 1.1.1, the Digital Link URI Syntax 1.4.0 and the resolver standard prose all
+      ship as PDF; GDM ships as a spreadsheet and GPC as a ZIP. So the identification keys and Application
+      Identifiers that the whole system rests on are free to read but not directly machine-consumable —
+      which is precisely why GS1 maintains the separate Barcode Syntax Dictionary as a machine-readable
+      companion. EANCOM, the EDI half of the catalogue, has no schema publication at all.
+    maturityLadder: >-
+      ref.gs1.org distinguishes ratified/current versions from archives, and each standard's page carries a
+      ratification date (e.g. the resolver standard is "Release 1.2.0, Ratified Jan 2026"). Draft work is
+      not published in the reference repository; the gs1/EPCIS GitHub repo is described as "Draft files
+      being shared for EPCIS 2.0 development" and should be treated as development history, with
+      ref.gs1.org as the normative source.
+    conformanceProgramme: >-
+      A public conformance test suite exists for the resolver standard
+      (https://ref.gs1.org/test-suites/resolver/, HTTP 200) and the EPCIS standard ships Conformance
+      Requirements in its GitHub repo. No public registry of certified conformant implementations was found
+      on gs1.org or ref.gs1.org during this pass — the resolver standard's "GS1-Conformant Resolvers on the
+      Web" section is prose, not a queryable list. Recorded as a gap, not as an absence of the programme.
+    dcsaMembershipVsPublication: not-applicable
+    dcsaNote: >-
+      GS1 is a horizontal identification body, not an ocean-container body. It holds no DCSA membership and
+      publishes no DCSA-conformant surface. Its logistics footprint is expressed through SSCC/GINC/GSIN, the
+      Logistics Interoperability Model, Scan4Transport and the GS1 Rail standard rather than through DCSA.
+
+probes:
+  developerSubdomains:
+  - url: https://developer.gs1.org/
+    result: NXDOMAIN
+  - url: https://docs.gs1.org/
+    result: NXDOMAIN
+  - url: https://api.gs1.org/
+    result: connection timed out (no answer)
+  - url: https://www.gs1.org/developers
+    httpStatus: 404
+  - url: https://www.gs1.org/api
+    httpStatus: 404
+  wellKnownAndSpecPaths:
+  - url: https://www.gs1.org/openapi.json
+    httpStatus: 404
+  - url: https://www.gs1.org/swagger.json
+    httpStatus: 404
+  - url: https://www.gs1.org/.well-known/security.txt
+    httpStatus: 404
+  - url: https://id.gs1.org/openapi.json
+    httpStatus: 404
+  - url: https://id.gs1.org/.well-known/gs1resolver
+    httpStatus: 200
+    contentType: application/json
+  liveSurface:
+  - url: https://id.gs1.org/01/09506000134352
+    httpStatus: 200
+    note: Resolves and redirects to https://dalgiardino.com/risotto-rice-with-mushrooms/ (GS1's own demo brand).
+  - url: https://id.gs1.org/01/09506000134352?linkType=all
+    httpStatus: 200
+    accept: application/linkset+json
+    note: Returns an RFC 9264 linkset keyed on GS1 Web Vocabulary link types (hasRetailers, pip, ...), unauthenticated.
+  - url: https://id.gs1.org/
+    httpStatus: 404
+    contentType: application/json
+    note: Root returns a JSON error, as expected — the resolver is keyed on identifier paths.
+  redirectsAndRenames:
+  - url: https://gepir.gs1.org/
+    httpStatus: 200
+    note: Redirects to https://www.gs1.org/services/verified-by-gs1?gepir_redirect=1 — GEPIR has been superseded by Verified by GS1.
+  - url: https://grp.gs1.org/
+    httpStatus: 404
+  notPartOfThisProfile:
+  - url: https://www.gs1us.org/tools/gs1-us-data-hub/gs1-us-apis
+    note: GS1 US Member Organisation developer portal and paid API add-on — a separate legal entity, profile separately.
+  - url: https://developer.gs1.se/
+    note: GS1 Sweden Member Organisation developer portal — separate entity.
+  - url: https://www.gs1uk.org/standards-services/data-services/gtin-check-api
+    note: GS1 UK GTIN Check API, access-key gated — separate entity.
+
+sources:
+- url: https://www.gs1.org/
+  type: Website
+  httpStatus: 200
+- url: https://ref.gs1.org/standards/
+  type: Documentation
+  httpStatus: 200
+  note: Full index of ratified standards with versions, archives and artefacts links.
+- url: https://ref.gs1.org/standards/resolver/
+  type: Specification
+  httpStatus: 200
+  note: GS1-Conformant Resolver Standard 1.2.0, ratified January 2026.
+- url: https://ref.gs1.org/standards/epcis/artefacts
+  type: Artefacts
+  httpStatus: 200
+  note: Lists OpenAPI, WSDL, XSD, SHACL, JSON-LD context and ontologies for EPCIS 2.0.1 / CBV 2.0.0.
+- url: https://ref.gs1.org/standards/epcis/openapi.json
+  type: OpenAPI
+  httpStatus: 200
+  note: Normative EPCIS 2.0.1 REST binding, OpenAPI 3.0.3, 29 paths, Apache-2.0 licensed per info.license.
+- url: https://github.com/gs1
+  type: SourceCode
+  httpStatus: 200
+  note: 34 public repos; org profile lists location "Brussels, Princeton".
+- url: https://www.gs1.org/services/verified-by-gs1
+  type: Registry
+  httpStatus: 200
+  note: Public web search over the global registry by GTIN, GLN or other keys. No public API documented at Global Office level.
+- url: https://www.gs1.org/standards/development-work-groups
+  type: Governance
+  httpStatus: 200
+  note: GSMP work groups; participation requires a GS1 Community Room / GS1 Xchange login.
+
+actions:
+  apisListed: 2
+  openapiHarvested: true
+  specsCount: 8
+  imageSource: https://ref.gs1.org/favicon-196x196.png (HTTP 200, image/png) — real GS1 mark, so the placeholder was not used.
+  note: >-
+    apis[] contains only surfaces GS1 itself publishes or operates. Member Organisation APIs (GS1 US,
+    GS1 UK, GS1 Sweden) are deliberately excluded — they are separate legal entities and belong in their
+    own repos.
