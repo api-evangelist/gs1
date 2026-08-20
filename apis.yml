@@ -49,6 +49,13 @@ apis:
   - Supply Chain Visibility
   - Track and Trace
   - Traceability
+  - Event
+  - Standards
+  tags_raw:
+  - EPCIS
+  - Supply Chain Visibility
+  - Track and Trace
+  - Traceability
   - Events
   - Standards
   properties:
