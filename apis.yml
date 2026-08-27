@@ -32,60 +32,17 @@ created: '2026-07-30'
 modified: '2026-07-30'
 specificationVersion: '0.23'
 apis:
-- aid: gs1:gs1-epcis-2-0-rest-api
-  name: GS1 EPCIS 2.0 REST API
-  description: >-
-    The normative REST binding of the GS1 EPCIS 2.0 standard — the sector's supply chain visibility event
-    interface, describing what happened to an object, when, where and why, using Core Business Vocabulary
-    terms. GS1 publishes the contract (OpenAPI 3.0.3, 29 paths) rather than hosting a repository: capture
-    (POST /capture), query (GET /events plus resource-scoped views by epc, bizStep, bizLocation, readPoint,
-    disposition and eventType), named queries (POST /queries), and mandatory webhook subscriptions
-    (POST /queries/{queryName}/subscriptions) where the client supplies a `dest` callback URL and a
-    signatureToken the server echoes back in a GS1-Signature header. Implementers host their own base URL;
-    the specification declares no `servers` block.
-  humanURL: https://ref.gs1.org/standards/epcis/
-  tags:
-  - EPCIS
-  - Supply Chain Visibility
-  - Track and Trace
-  - Traceability
-  - Event
-  - Standards
-  tags_raw:
-  - EPCIS
-  - Supply Chain Visibility
-  - Track and Trace
-  - Traceability
-  - Events
-  - Standards
-  properties:
-  - type: OpenAPI
-    url: openapi/gs1-epcis-2-0-1-openapi.json
-  - type: JSONSchema
-    url: json-schema/gs1-epcis-json-schema.json
-  - type: JSONSchema
-    url: json-schema/gs1-epcis-query-schema.json
-  - type: Specification
-    url: https://ref.gs1.org/standards/epcis/2.0.1/
-  - type: Documentation
-    url: https://www.gs1.org/standards/epcis
-  - type: Artefacts
-    url: https://ref.gs1.org/standards/epcis/artefacts
-  - type: Vocabulary
-    url: https://ref.gs1.org/cbv/
-  - type: SourceCode
-    url: https://github.com/gs1/EPCIS
 - aid: gs1:gs1-digital-link-resolver
   name: GS1 Digital Link Resolver (id.gs1.org)
   description: >-
     GS1 AISBL's own live, unauthenticated GS1-Conformant Resolver, implementing the GS1-Conformant Resolver
-    Standard 1.2.0. It takes a GS1 Digital Link URI built from a GS1 identification key and returns either a
-    303 redirect to the brand owner's target resource or, on request, an RFC 9264 linkset enumerating every
-    registered link type for that key. The resolver description document at /.well-known/gs1resolver declares
-    the supported primary keys — 00 (SSCC), 01 (GTIN), 253 (GDTI), 255 (GCN), 401 (GINC), 402 (GSIN),
-    414/415/417 (GLN), 8003 (GRAI), 8004 (GIAI), 8006 (ITIP), 8010 (CPID), 8013 (GMN) and 8017/8018 (GSRN) —
-    which includes the consignment and shipment keys logistics parties actually quote. No key, no signup and
-    no contract is required to call it.
+    Standard 1.2.0. It takes a GS1 Digital Link URI built from a GS1 identification key and returns either
+    a 303 redirect to the brand owner's target resource or, on request, an RFC 9264 linkset enumerating
+    every registered link type for that key. The resolver description document at /.well-known/gs1resolver
+    declares the supported primary keys — 00 (SSCC), 01 (GTIN), 253 (GDTI), 255 (GCN), 401 (GINC), 402
+    (GSIN), 414/415/417 (GLN), 8003 (GRAI), 8004 (GIAI), 8006 (ITIP), 8010 (CPID), 8013 (GMN) and 8017/8018
+    (GSRN) — which includes the consignment and shipment keys logistics parties actually quote. No key,
+    no signup and no contract is required to call it.
   humanURL: https://ref.gs1.org/standards/resolver/
   baseURL: https://id.gs1.org
   tags:
@@ -116,6 +73,173 @@ apis:
     url: https://ref.gs1.org/test-suites/resolver/
   - type: SourceCode
     url: https://github.com/gs1/GS1_DigitalLink_Resolver_CE
+- aid: gs1:gs1-capture-api
+  name: GS1 Capture API
+  description: Endpoints to capture EPCIS events in bulk or individually.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Capture
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-capture-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-discovery-api
+  name: GS1 Discovery API
+  description: >-
+    Endpoints to obtain information about the endpoint, such as EPCIS and CBV versions or custom vocabularies.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-discovery-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-events-api
+  name: GS1 Events API
+  description: Endpoints that allow you to retrieve EPCIS events as Web resources.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Events
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-events-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-queries-api
+  name: GS1 Queries API
+  description: >-
+    Endpoints to create large named or anonymous queries using the EPCIS Query Language. Named queries
+    have a custom
+
+    name and are stored until deleted by the user. Anonymous queries are not persisted and only available
+    to the caller.
+
+    EPCIS events queries also support query subscription.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Queries
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-queries-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-subscriptions-api
+  name: GS1 Subscriptions API
+  description: EPCIS 2.0 supports query subscriptions using Webhooks or Websockets.
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Subscriptions
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-subscriptions-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
+- aid: gs1:gs1-top-level-api
+  name: GS1 Top Level API
+  description: >-
+    Endpoints to browse or retrieve information about EPCIS resources:
+
+    - events
+
+    - types of events
+
+    - electronic product codes
+
+    - business steps
+
+    - business locations
+
+    - read points
+
+    - dispositions
+  humanURL: https://ref.gs1.org/standards/epcis/
+  baseURL: https://id.gs1.org
+  tags:
+  - Top-level
+  properties:
+  - type: OpenAPI
+    url: openapi/gs1-top-level-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-json-schema.json
+  - type: JSONSchema
+    url: json-schema/gs1-epcis-query-schema.json
+  - type: Specification
+    url: https://ref.gs1.org/standards/epcis/2.0.1/
+  - type: Documentation
+    url: https://www.gs1.org/standards/epcis
+  - type: Artefacts
+    url: https://ref.gs1.org/standards/epcis/artefacts
+  - type: Vocabulary
+    url: https://ref.gs1.org/cbv/
+  - type: SourceCode
+    url: https://github.com/gs1/EPCIS
 common:
 - type: IssueTracker
   url: https://github.com/gs1/EPCIS/issues
