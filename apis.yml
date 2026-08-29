@@ -16,6 +16,18 @@ description: >-
   issuing GS1 identifiers and querying the Verified by GS1 registry are federated to national GS1 Member
   Organisations and sold under paid membership or a commercial API subscription, not offered self-serve by
   the Global Office.
+deliveryModel:
+  model: unknown
+  open_source: unknown
+  commercial: false
+  callable_host: false
+  label: Delivery model not determined — needs a product licence on record
+  confidence: low
+  source:
+  - openapi
+  - repository-unlicensed
+  generated: '2026-08-28'
+  method: derived
 image: https://ref.gs1.org/favicon-196x196.png
 tags:
 - Logistics
