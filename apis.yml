@@ -253,6 +253,9 @@ apis:
   - type: SourceCode
     url: https://github.com/gs1/EPCIS
 common:
+- type: CapabilityMap
+  url: capabilities/gs1-capability-edges.yml
+  name: GS1 Business Capability Map
 - type: IssueTracker
   url: https://github.com/gs1/EPCIS/issues
 - type: CodeOfConduct

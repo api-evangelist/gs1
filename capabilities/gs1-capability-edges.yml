@@ -1,0 +1,26 @@
+slug: gs1
+provider: GS1
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Transportation & Logistics
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 1
+edges:
+- tag: Capture
+  spec_file: gs1-capture-api-openapi.yml
+  capability_id: BC-2510.10
+  capability_id_l1: BC-2510
+  capability_name: Event Capture and Status Management
+  confidence: 0.74
+  evidence: Endpoints to capture EPCIS events in bulk or individually; POST /events Synchronous capture
+    interface for a single EPCIS event
+  reason: EPCIS event capture (bizStep, disposition, readPoint, sensorElement) is the ingestion of supply
+    chain visibility events, matching event capture and status management. Some risk it is judged pure
+    integration middleware.
