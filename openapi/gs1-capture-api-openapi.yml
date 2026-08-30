@@ -1,0 +1,2204 @@
+openapi: 3.2.0
+info:
+  version: 2.0.1
+  title: EPCIS 2.0 REST Bindings Capture API
+  license:
+    name: Apache2
+  description: 'Endpoints to capture EPCIS events in bulk or individually.
+
+    '
+tags:
+- name: Capture
+  description: 'Endpoints to capture EPCIS events in bulk or individually.
+
+    '
+paths:
+  /capture:
+    parameters:
+    - $ref: '#/components/parameters/GS1-Extensions'
+    post:
+      tags:
+      - Capture
+      summary: Asynchronous capture endpoint for one or more EPCIS events.
+      parameters:
+      - $ref: '#/components/parameters/GS1-EPCIS-Version'
+      - $ref: '#/components/parameters/GS1-CBV-Version'
+      - $ref: '#/components/parameters/GS1-Capture-Error-Behaviour'
+      description: 'EPCIS events are added in bulk using the capture interface. Four design considerations were made to remain compatible with EPCIS 1.2:
+
+        - EPCIS 2.0 keeps event IDs optional. If event IDs are missing, the server should populate the event ID with a unique value.
+
+        Otherwise, it won''t be possible to retrieve these events by eventID.
+
+        - By default, EPCIS events are only stored if the entire capture job was successful. This behaviour can be changed with the `GS1-Capture-Error-Behaviour` header.
+
+        - EPCIS master data can be captured in the header (`epcisHeader`) of an `EPCISDocument`.
+
+        - This endpoint should support both `EPCISDocument` and `EPCISQueryDocument` as input.
+
+        To prevent timeouts for large payloads, the client potentially may need to split the payload into several capture calls. To that end, the server can specify a capture
+
+        limit (number of EPCIS events) and file size limit (payload size).
+
+        A successful capturing of events does not guarantee that events will be stored. Instead, the server returns a
+
+        capture id, which the client can use to obtain information about the capture job.
+
+        '
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+              - $ref: '#/components/schemas/epcisQueryDocument'
+              - $ref: '#/components/schemas/epcisDocument'
+            example:
+              '@context':
+              - https://ref.gs1.org/standards/epcis/epcis-context.jsonld
+              - example: http://ns.example.com/epcis/
+              id: https://id.example.org/document1
+              type: EPCISDocument
+              schemaVersion: '2.0'
+              creationDate: '2005-07-11T11:30:47.0Z'
+              epcisBody:
+                eventList:
+                - eventID: ni:///sha-256;df7bb3c352fef055578554f09f5e2aa41782150ced7bd0b8af24dd3ccb30ba69?ver=CBV2.0
+                  type: ObjectEvent
+                  action: OBSERVE
+                  bizStep: shipping
+                  disposition: in_transit
+                  epcList:
+                  - urn:epc:id:sgtin:0614141.107346.2017
+                  - urn:epc:id:sgtin:0614141.107346.2018
+                  eventTime: '2005-04-03T20:33:31.116000-06:00'
+                  eventTimeZoneOffset: -06:00
+                  readPoint:
+                    id: urn:epc:id:sgln:0614141.07346.1234
+                  bizTransactionList:
+                  - type: po
+                    bizTransaction: http://transaction.acme.com/po/12345678
+                - eventID: ni:///sha-256;00e1e6eba3a7cc6125be4793a631f0af50f8322e0ab5f2c0bab994a11cec1d79?ver=CBV2.0
+                  type: ObjectEvent
+                  action: OBSERVE
+                  bizStep: receiving
+                  disposition: in_progress
+                  epcList:
+                  - urn:epc:id:sgtin:0614141.107346.2018
+                  eventTime: '2005-04-04T20:33:31.116-06:00'
+                  eventTimeZoneOffset: -06:00
+                  readPoint:
+                    id: urn:epc:id:sgln:0012345.11111.400
+                  bizLocation:
+                    id: urn:epc:id:sgln:0012345.11111.0
+                  bizTransactionList:
+                  - type: po
+                    bizTransaction: http://transaction.acme.com/po/12345678
+                  - type: desadv
+                    bizTransaction: urn:epcglobal:cbv:bt:0614141073467:1152
+                  example:myField: Example of a vendor/user extension
+      responses:
+        '202':
+          description: 'Successfully received one or more EPCIS events. The request returns a unique
+
+            capture job URL in the Location header.
+
+            '
+          headers:
+            GS1-EPCIS-Version:
+              $ref: '#/components/headers/GS1-EPCIS-Version'
+            GS1-CBV-Version:
+              $ref: '#/components/headers/GS1-CBV-Version'
+            GS1-Extensions:
+              $ref: '#/components/headers/GS1-Extensions'
+            Location:
+              description: 'Absolute or relative URL of the capture job.
+
+                '
+              schema:
+                example: /capture/id9261379075
+                type: string
+                minLength: 1
+        '400':
+          description: 'An error occurred while receiving EPCIS events. All events are rejected. This is not to be confused with
+
+            an error while capturing EPCIS events. To monitor the capture job, use the `/capture/{captureID}` endpoint.
+
+            '
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                - properties:
+                    status:
+                      type: integer
+                      enum:
+                      - 400
+                      default: 400
+                    type:
+                      type: string
+                      format: uri
+                      enum:
+                      - epcisException:ValidationException
+                - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+            application/problem+xml:
+              schema:
+                allOf:
+                - properties:
+                    status:
+                      type: integer
+                      enum:
+                      - 400
+                      default: 400
+                    type:
+                      type: string
+                      format: uri
+                      enum:
+                      - epcisException:ValidationException
+                - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        '401':
+          $ref: '#/components/responses/401UnauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/403ClientUnauthorized'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '413':
+          $ref: '#/components/responses/413CapturePayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/415UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/500ImplementationException'
+    get:
+      tags:
+      - Capture
+      parameters:
+      - $ref: '#/components/parameters/NextPageToken'
+      - $ref: '#/components/parameters/PerPage'
+      - $ref: '#/components/parameters/GS1-EPCIS-Min'
+      - $ref: '#/components/parameters/GS1-EPCIS-Max'
+      - $ref: '#/components/parameters/GS1-Extensions'
+      summary: Returns a list of capture jobs.
+      description: "When EPCIS events are added through the capture interface, the capture process can run asynchronously. If the payload\nis syntactically correct and the client is allowed to call `/capture`, the server returns a `202` HTTP response code. \nThis endpoint returns all capture jobs that were created\nand supports pagination.\n"
+      responses:
+        '200':
+          headers:
+            GS1-EPCIS-Version:
+              $ref: '#/components/headers/GS1-EPCIS-Version'
+            GS1-Extensions:
+              $ref: '#/components/headers/GS1-Extensions'
+            Link:
+              $ref: '#/components/headers/Link'
+            GS1-Next-Page-Token-Expires:
+              $ref: '#/components/headers/GS1-Next-Page-Token-Expires'
+          description: 'A capture job document has at least the following properties:
+
+            - `running`: whether or not the capture job is still active.
+
+            - `success`: whether or not at least one error occurred.
+
+            - `captureErrorBehaviour`: GS1-Capture-Error-Behaviour header value provided with POST data to capture.
+
+            - `errors` or `errorFile`: with the errors if `success` is `false`.
+
+            ### captureErrorBehaviour value is `rollback`
+
+            | Capture job `running` | Capture job `success` | Capture job outcome |
+
+            |:--------|:---------|:---------|
+
+            | `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |
+
+            | `true` | `false` | At least one error occurred. Rollback is in progress. |
+
+            | `false` | `true` | All EPCIS events are captured. |
+
+            | `false` | `false` | All EPCIS events are rejected. |
+
+            ### captureErrorBehaviour value is `proceed`
+
+            | Capture job `running` | Capture job `success` | Capture job outcome |
+
+            |:--------|:---------|:---------|
+
+            | `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |
+
+            | `true` | `false` | At least one error occurred but more EPCIS events are currently being captured. |
+
+            | `false` | `true` | All EPCIS events were captured without an error. |
+
+            | `false` | `false` | Some EPCIS events were captured but errors occurred. |
+
+            If `success` is `false`, check the `errors` or `errorFile` property for details.
+
+            '
+          content:
+            application/json:
+              example:
+              - captureID: id261378658356
+                createdAt: '2021-07-21T17:32:28Z'
+                finishedAt: '2022-01-21T17:45:28Z'
+                running: false
+                success: true
+                captureErrorBehaviour: rollback
+                errors: []
+              - captureID: id9261379075
+                createdAt: '2021-08-21T17:32:28Z'
+                running: true
+                success: true
+                captureErrorBehaviour: proceed
+                errors: []
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CaptureJob'
+                uniqueItems: true
+        '401':
+          $ref: '#/components/responses/401UnauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/403ClientUnauthorized'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '500':
+          $ref: '#/components/responses/500ImplementationException'
+  /capture/{captureID}:
+    parameters:
+    - in: path
+      name: captureID
+      example: id9261379075
+      description: A unique value identifying a capture job generated by the server.
+      required: true
+      schema:
+        type: string
+    - $ref: '#/components/parameters/GS1-Extensions'
+    get:
+      parameters:
+      - $ref: '#/components/parameters/GS1-EPCIS-Min'
+      - $ref: '#/components/parameters/GS1-EPCIS-Max'
+      tags:
+      - Capture
+      summary: Returns information about the capture job.
+      description: "When EPCIS events are added through the capture interface, the capture process can run asynchronously. If the payload\nis syntactically correct and the client is allowed to call `/capture`, the server returns a `202` HTTP response code. \nThis endpoint exposes the state of the capture job to the client.\n"
+      responses:
+        '200':
+          headers:
+            GS1-EPCIS-Version:
+              $ref: '#/components/headers/GS1-EPCIS-Version'
+            GS1-Extensions:
+              $ref: '#/components/headers/GS1-Extensions'
+          description: "A capture job document has at least the following properties:\n- `running`: whether or not the capture job is still active.\n- `success`: whether or not at least one error occurred.\n- `captureErrorBehaviour`: GS1-Capture-Error-Behaviour header value provided with POST data to capture.\n- `errors` or `errorFile`: with the errors if `success` is `false`.\n### captureErrorBehaviour value is `rollback`\n| Capture job `running` | Capture job `success` | Capture job outcome |\n|:--------|:---------|:---------| \n| `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |\n| `true` | `false` | At least one error occurred. Rollback is in progress. |\n| `false` | `true` | All EPCIS events are captured. |\n| `false` | `false` | All EPCIS events are rejected. |\n### captureErrorBehaviour value is `proceed`\n| Capture job `running` | Capture job `success` | Capture job outcome |\n|:--------|:---------|:---------|\n| `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |\n| `true` | `false` | At least one error occurred but more EPCIS events are currently being captured. |\n| `false` | `true` | All EPCIS events were captured without an error. |\n| `false` | `false` | Some EPCIS events were captured but errors occurred. |\nIf `success` is `false`, check the `errors` or `errorFile` property for details.\n"
+          content:
+            application/json:
+              example:
+                captureID: id261378658356
+                createdAt: '2021-07-21T17:32:28Z'
+                finishedAt: '2022-01-21T17:45:28Z'
+                running: false
+                success: true
+                captureErrorBehaviour: rollback
+                errors: []
+              schema:
+                $ref: '#/components/schemas/CaptureJob'
+            application/xml:
+              example:
+                captureID: id261378658356
+                running: false
+                success: true
+                captureErrorBehaviour: rollback
+                createdAt: '2021-07-21T17:32:28Z'
+                finishedAt: '2022-01-21T17:45:28Z'
+              schema:
+                $ref: '#/components/schemas/CaptureJob'
+        '401':
+          $ref: '#/components/responses/401UnauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/403ClientUnauthorized'
+        '404':
+          $ref: '#/components/responses/404ResourceNotFound'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '500':
+          $ref: '#/components/responses/500ImplementationException'
+  /events:
+    parameters:
+    - $ref: '#/components/parameters/GS1-Extensions'
+    post:
+      parameters:
+      - $ref: '#/components/parameters/GS1-EPCIS-Version'
+      - $ref: '#/components/parameters/GS1-CBV-Version'
+      tags:
+      - Capture
+      summary: Synchronous capture interface for a single EPCIS event.
+      description: 'An individual EPCIS event can be created by making a `POST` request on the `/events` resource. Alternatively, the client can also use the `/capture`
+
+        interface and capture a single event.
+
+        '
+      requestBody:
+        required: true
+        description: A single EPCIS event.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EPCISEvent'
+            example:
+              '@context': https://ref.gs1.org/standards/epcis/epcis-context.jsonld
+              eventID: ni:///sha-256;df7bb3c352fef055578554f09f5e2aa41782150ced7bd0b8af24dd3ccb30ba69?ver=CBV2.0
+              type: ObjectEvent
+              action: OBSERVE
+              bizStep: shipping
+              disposition: in_transit
+              epcList:
+              - urn:epc:id:sgtin:0614141.107346.2017
+              - urn:epc:id:sgtin:0614141.107346.2018
+              eventTime: '2005-04-03T20:33:31.116000-06:00'
+              eventTimeZoneOffset: -06:00
+              readPoint:
+                id: urn:epc:id:sgln:0614141.07346.1234
+              bizTransactionList:
+              - type: po
+                bizTransaction: http://transaction.acme.com/po/12345678
+      responses:
+        '201':
+          description: 'Successfully created (captured) the EPCIS event. The request returns the URL of newly created
+
+            EPCIS event in the Location header.
+
+            '
+          headers:
+            GS1-EPCIS-Version:
+              $ref: '#/components/headers/GS1-EPCIS-Version'
+            GS1-CBV-Version:
+              $ref: '#/components/headers/GS1-CBV-Version'
+            GS1-Extensions:
+              $ref: '#/components/headers/GS1-Extensions'
+            Location:
+              description: "Absolute or relative URL of the newly captured EPCIS event. \n"
+              schema:
+                example: https://example.com/events/urn:uuid:831c0292-4de1-430a-8255-2aca821abaab
+                type: string
+                minLength: 1
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EPCISEvent'
+        '400':
+          description: An error occurred while creating the EPCIS event. The event was rejected.
+          content:
+            application/problem+json:
+              schema:
+                allOf:
+                - properties:
+                    status:
+                      type: integer
+                      enum:
+                      - 400
+                      default: 400
+                    type:
+                      type: string
+                      format: uri
+                      enum:
+                      - epcisException:ValidationException
+                - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        '401':
+          $ref: '#/components/responses/401UnauthorizedRequest'
+        '403':
+          $ref: '#/components/responses/403ClientUnauthorized'
+        '406':
+          $ref: '#/components/responses/406NotAcceptable'
+        '409':
+          $ref: '#/components/responses/409ResourceAlreadyExistsException'
+        '413':
+          $ref: '#/components/responses/413CapturePayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/415UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/500ImplementationException'
+components:
+  schemas:
+    error-reason:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - did_not_occur
+        - incorrect_data
+    queryResults:
+      type: object
+      properties:
+        queryName:
+          type: string
+        subscriptionID:
+          type: string
+        resultsBody:
+          $ref: '#/components/schemas/resultsBody'
+      required:
+      - queryName
+      - resultsBody
+    ObjectEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - ObjectEvent
+          epcList:
+            $ref: '#/components/schemas/epcList'
+          quantityList:
+            $ref: '#/components/schemas/quantityList'
+          action:
+            $ref: '#/components/schemas/action'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          persistentDisposition:
+            $ref: '#/components/schemas/persistentDisposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+          ilmd:
+            $ref: '#/components/schemas/ilmd'
+        required:
+        - type
+        - action
+      - anyOf:
+        - type: object
+          properties:
+            epcList:
+              type: array
+              minItems: 0
+              items:
+                $ref: '#/components/schemas/id'
+          required:
+          - epcList
+        - type: object
+          properties:
+            quantityList:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/quantityElement'
+          required:
+          - quantityList
+        - allOf:
+          - type: object
+            properties:
+              sensorElementList:
+                type: array
+                items:
+                  $ref: '#/components/schemas/sensorElement'
+                minItems: 1
+            required:
+            - sensorElementList
+          - type: object
+            properties:
+              readPoint:
+                $ref: '#/components/schemas/readPoint'
+            required:
+            - readPoint
+      - anyOf:
+        - type: object
+          properties:
+            ilmd:
+              not: {}
+            action:
+              type: string
+              pattern: ^OBSERVE$
+        - type: object
+          properties:
+            ilmd:
+              not: {}
+            action:
+              type: string
+              pattern: ^DELETE$
+        - type: object
+          properties:
+            action:
+              type: string
+              pattern: ^ADD$
+    attribute:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+        attribute:
+          anyOf:
+          - type: number
+          - type: string
+          - type: object
+      required:
+      - id
+    ilmd:
+      type: object
+    component:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - x
+        - y
+        - z
+        - axial_distance
+        - azimuth
+        - height
+        - spherical_radius
+        - polar_angle
+        - elevation_angle
+        - easting
+        - northing
+        - latitude
+        - longitude
+        - altitude
+    GS1-Extensions:
+      example: 'example-epc-ext=http://org1.example.com/epcis/,
+
+        example-epc-ext2=http://vendor.example.com/epcis/
+
+        '
+      type: object
+    epcisHeader:
+      type: object
+      properties:
+        epcisMasterData:
+          type: object
+          properties:
+            vocabularyList:
+              type: array
+              items:
+                $ref: '#/components/schemas/vocabulary'
+    bizStep:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - accepting
+        - arriving
+        - assembling
+        - collecting
+        - commissioning
+        - consigning
+        - creating_class_instance
+        - cycle_counting
+        - decommissioning
+        - departing
+        - destroying
+        - disassembling
+        - dispensing
+        - encoding
+        - entering_exiting
+        - holding
+        - inspecting
+        - installing
+        - killing
+        - loading
+        - other
+        - packing
+        - picking
+        - receiving
+        - removing
+        - repackaging
+        - repairing
+        - replacing
+        - reserving
+        - retail_selling
+        - shipping
+        - staging_outbound
+        - stock_taking
+        - stocking
+        - storing
+        - transporting
+        - unloading
+        - unpacking
+        - void_shipping
+        - sensor_reporting
+        - sampling
+    sensorElement:
+      type: object
+      properties:
+        sensorMetadata:
+          $ref: '#/components/schemas/sensorMetadata'
+        sensorReport:
+          $ref: '#/components/schemas/sensorReportList'
+      required:
+      - sensorReport
+    eventID:
+      $ref: '#/components/schemas/uri'
+    GS1-Next-Page-Token-Expires:
+      example: '2017-07-21T17:32:28Z'
+      type: string
+      format: date-time
+    GS1-EPCIS-Max:
+      allOf:
+      - example: 2.0.1
+      - $ref: '#/components/schemas/version'
+    errorDeclaration:
+      type: object
+      properties:
+        declarationTime:
+          $ref: '#/components/schemas/time'
+        reason:
+          $ref: '#/components/schemas/error-reason'
+        correctiveEventIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/eventID'
+      required:
+      - declarationTime
+    certificationInfo:
+      anyOf:
+      - type: array
+        items:
+          $ref: '#/components/schemas/uri'
+      - $ref: '#/components/schemas/uri'
+    bizTransaction-type:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - bol
+        - cert
+        - desadv
+        - inv
+        - pedigree
+        - po
+        - poc
+        - prodorder
+        - recadv
+        - rma
+        - testprd
+        - testres
+        - upevt
+    resultsBody:
+      type: object
+      properties:
+        eventList:
+          $ref: '#/components/schemas/eventList'
+        vocabularyList:
+          $ref: '#/components/schemas/vocabularyList'
+      required:
+      - eventList
+    disposition:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - active
+        - container_closed
+        - damaged
+        - destroyed
+        - dispensed
+        - disposed
+        - encoded
+        - expired
+        - in_progress
+        - in_transit
+        - inactive
+        - no_pedigree_match
+        - non_sellable_other
+        - partially_dispensed
+        - recalled
+        - reserved
+        - retail_sold
+        - returned
+        - sellable_accessible
+        - sellable_not_accessible
+        - stolen
+        - unknown
+        - available
+        - completeness_verified
+        - completeness_inferred
+        - conformant
+        - container_open
+        - mismatch_instance
+        - mismatch_class
+        - mismatch_quantity
+        - needs_replacement
+        - non_conformant
+        - unavailable
+    GS1-EPCIS-Capture-File-Size-Limit:
+      example: 1024
+      type: integer
+      minimum: 1
+    sensorReport:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/measurementType'
+        exception:
+          $ref: '#/components/schemas/sensorAlertType'
+        deviceID:
+          $ref: '#/components/schemas/uri'
+        deviceMetadata:
+          $ref: '#/components/schemas/uri'
+        rawData:
+          $ref: '#/components/schemas/uri'
+        dataProcessingMethod:
+          $ref: '#/components/schemas/uri'
+        bizRules:
+          $ref: '#/components/schemas/uri'
+        time:
+          $ref: '#/components/schemas/time'
+        microorganism:
+          $ref: '#/components/schemas/uri'
+        chemicalSubstance:
+          $ref: '#/components/schemas/uri'
+        coordinateReferenceSystem:
+          $ref: '#/components/schemas/uri'
+        value:
+          $ref: '#/components/schemas/decimal'
+        component:
+          $ref: '#/components/schemas/component'
+        stringValue:
+          $ref: '#/components/schemas/string'
+        booleanValue:
+          $ref: '#/components/schemas/boolean'
+        hexBinaryValue:
+          $ref: '#/components/schemas/hexBinary'
+        uriValue:
+          $ref: '#/components/schemas/uri'
+        minValue:
+          $ref: '#/components/schemas/decimal'
+        maxValue:
+          $ref: '#/components/schemas/decimal'
+        meanValue:
+          $ref: '#/components/schemas/decimal'
+        sDev:
+          $ref: '#/components/schemas/decimal'
+        percRank:
+          $ref: '#/components/schemas/decimal'
+        percValue:
+          $ref: '#/components/schemas/decimal'
+        uom:
+          $ref: '#/components/schemas/string'
+      required:
+      - type
+    AggregationEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - AggregationEvent
+          parentID:
+            $ref: '#/components/schemas/uri'
+          childEPCs:
+            type: array
+            items:
+              $ref: '#/components/schemas/uri'
+          childQuantityList:
+            type: array
+            items:
+              $ref: '#/components/schemas/quantityElement'
+          action:
+            $ref: '#/components/schemas/action'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+        required:
+        - type
+        - action
+      - anyOf:
+        - type: object
+          properties:
+            childEPCs:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/id'
+          required:
+          - childEPCs
+        - type: object
+          properties:
+            childQuantityList:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/quantityElement'
+          required:
+          - childQuantityList
+        - type: object
+          properties:
+            action:
+              type: string
+              pattern: ^DELETE$
+    vocab-other-uri:
+      type: string
+      format: uri
+      pattern: ^(?!(urn:epcglobal:cbv|https?:\/\/ns\.gs1\.org/cbv\/))
+    AssociationEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - AssociationEvent
+          parentID:
+            $ref: '#/components/schemas/uri'
+          childEPCs:
+            type: array
+            items:
+              $ref: '#/components/schemas/uri'
+          childQuantityList:
+            type: array
+            items:
+              $ref: '#/components/schemas/quantityElement'
+          action:
+            $ref: '#/components/schemas/action'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+        required:
+        - type
+        - action
+        - parentID
+      - anyOf:
+        - type: object
+          properties:
+            childEPCs:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/id'
+          required:
+          - childEPCs
+        - type: object
+          properties:
+            childQuantityList:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/quantityElement'
+          required:
+          - childQuantityList
+        - type: object
+          properties:
+            action:
+              type: string
+              pattern: ^DELETE$
+    NextPageToken:
+      description: 'Parameter that points to the next list of results when requesting a list of events that is larger than the value
+
+        specified with the `perPage` parameter. Some technologies refer to this as scrolling.
+
+        A `nextPageToken` may be invalidated through timeout. It is up to the specific implementation to provide
+
+        the mechanisms for invalidating tokens.
+
+        '
+      type: string
+      example: 3A15506738749783AU6D7DENAKwM2gQRRwGrataeq
+    vocab-uri:
+      type: string
+      format: uri
+    time:
+      type: string
+      format: date-time
+    readPoint:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+      required:
+      - id
+    epcisDocument:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        type:
+          type: string
+          enum:
+          - EPCISDocument
+        '@context':
+          $ref: '#/components/schemas/LDContext'
+        schemaVersion:
+          $ref: '#/components/schemas/version'
+        creationDate:
+          $ref: '#/components/schemas/time'
+        instanceIdentifier:
+          type: string
+        sender:
+          type: string
+        receiver:
+          type: string
+        epcisHeader:
+          $ref: '#/components/schemas/epcisHeader'
+        epcisBody:
+          type: object
+          properties:
+            eventList:
+              $ref: '#/components/schemas/eventList'
+          required:
+          - eventList
+      required:
+      - '@context'
+      - type
+      - schemaVersion
+      - creationDate
+      - epcisBody
+    id:
+      type: string
+      format: uri
+    uom:
+      type: string
+      pattern: ^[A-Z0-9]{2,3}$
+    source-dest-type:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - owning_party
+        - possessing_party
+        - location
+    hexBinary:
+      type: string
+      pattern: ^[A-Fa-f0-9]+$
+    sensorAlertType:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-nonGS1WebVoc-uri'
+      - type: string
+        enum:
+        - ALARM_CONDITION
+        - ERROR_CONDITION
+    EPCISEvent:
+      description: "EPCIS Event. It must validate against the normative \n<a href=\"../epcis-json-schema.json\">EPCIS JSON Schema</a> or <a href=\"../Ontology/EPCIS-SHACL.ttl\">EPCIS SHACL</a>. \n"
+      oneOf:
+      - $ref: '#/components/schemas/ObjectEvent'
+      - $ref: '#/components/schemas/AggregationEvent'
+      - $ref: '#/components/schemas/TransactionEvent'
+      - $ref: '#/components/schemas/TransformationEvent'
+      - $ref: '#/components/schemas/AssociationEvent'
+      - $ref: '#/components/schemas/Extended-Event'
+    decimal:
+      type: number
+    TransactionEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - TransactionEvent
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+            minItems: 1
+          parentID:
+            $ref: '#/components/schemas/uri'
+          epcList:
+            type: array
+            items:
+              $ref: '#/components/schemas/uri'
+          quantityList:
+            type: array
+            items:
+              $ref: '#/components/schemas/quantityElement'
+          action:
+            $ref: '#/components/schemas/action'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+        required:
+        - type
+        - bizTransactionList
+        - action
+      - anyOf:
+        - type: object
+          properties:
+            epcList:
+              type: array
+              minItems: 0
+              items:
+                $ref: '#/components/schemas/id'
+          required:
+          - epcList
+        - type: object
+          properties:
+            quantityList:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/quantityElement'
+          required:
+          - quantityList
+        - type: object
+          properties:
+            action:
+              type: string
+              pattern: ^DELETE$
+    GS1-EPCIS-Version:
+      allOf:
+      - example: 2.0.1
+      - $ref: '#/components/schemas/version'
+    quantityList:
+      type: array
+      items:
+        $ref: '#/components/schemas/quantityElement'
+    vocabularyList:
+      type: array
+      items:
+        $ref: '#/components/schemas/vocabulary'
+    destination:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/source-dest-type'
+        destination:
+          $ref: '#/components/schemas/uri'
+      required:
+      - type
+      - destination
+      additionalProperties: false
+    sensorReportList:
+      type: array
+      items:
+        $ref: '#/components/schemas/sensorReport'
+      minItems: 1
+    bizLocation:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+      required:
+      - id
+    eventList:
+      type: array
+      items:
+        $ref: '#/components/schemas/EPCISEvent'
+    quantityElement:
+      type: object
+      properties:
+        epcClass:
+          $ref: '#/components/schemas/uri'
+        quantity:
+          $ref: '#/components/schemas/decimal'
+        uom:
+          $ref: '#/components/schemas/uom'
+      required:
+      - epcClass
+      additionalProperties: false
+    bizTransaction:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/bizTransaction-type'
+        bizTransaction:
+          $ref: '#/components/schemas/uri'
+      required:
+      - bizTransaction
+      additionalProperties: false
+    CaptureJob:
+      description: 'When EPCIS events are added through the capture interface, the capture process can run asynchronously. If the payload
+
+        is syntactically correct and the client is allowed to call `/capture`, the server returns a `202` HTTP response code. This
+
+        does not guarantee successful storage of all EPCIS events. The capture job exposes the state of the capture job to the client.
+
+        A capture job document has at least the following properties:
+
+        - `running`: whether or not the capture job is still active.
+
+        - `success`: whether or not at least one error occurred.
+
+        - `captureErrorBehaviour`: GS1-Capture-Error-Behaviour header value provided with POST data to capture.
+
+        - `errors` or `errorFile`: with the errors if `success` is `false`.
+
+        ### captureErrorBehaviour value is `rollback`
+
+        | Capture job `running` | Capture job `success` | Capture job outcome |
+
+        |:--------|:---------|:---------|
+
+        | `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |
+
+        | `true` | `false` | At least one error occurred. Rollback is in progress. |
+
+        | `false` | `true` | All EPCIS events are captured. |
+
+        | `false` | `false` | All EPCIS events are rejected. |
+
+        ### captureErrorBehaviour value is `proceed`
+
+        | Capture job `running` | Capture job `success` | Capture job outcome |
+
+        |:--------|:---------|:---------|
+
+        | `true` | `true` | Still capturing EPCIS events. No errors occurred so far. |
+
+        | `true` | `false` | At least one error occurred but more EPCIS events are currently being captured. |
+
+        | `false` | `true` | All EPCIS events were captured without an error. |
+
+        | `false` | `false` | Some EPCIS events were captured but errors occurred. |
+
+        If `success` is `false`, check the `errors` or `errorFile` property for details.
+
+        '
+      example:
+        captureID: id9261379075
+        createdAt: '2022-01-21T17:32:28Z'
+        finishedAt: '2022-01-21T17:45:28Z'
+        running: false
+        success: true
+        captureErrorBehaviour: rollback
+        errors: []
+      type: object
+      allOf:
+      - properties:
+          captureID:
+            example: id9261379075
+            description: A unique value identifying a capture job generated by the server.
+            type: string
+            xml:
+              attribute: true
+          running:
+            description: 'If the job is still running, the state is `true`, otherwise `false`.
+
+              '
+            type: boolean
+            example: true
+            xml:
+              attribute: true
+          success:
+            description: 'If `success` is `false`, there was at least one error. Otherwise, `success` is `true`.
+
+              If the `GS1-Capture-Error-Behaviour` header is `rollback`, `success` being `false` aborts the capture
+
+              job and rejects all EPCIS events related to the job.
+
+              If `GS1-Capture-Error-Behaviour` header is `proceed`, some EPCIS events might still be captured, even
+
+              if `success` is `false`.
+
+              '
+            type: boolean
+            example: false
+            xml:
+              attribute: true
+          createdAt:
+            description: When the capture job started
+            example: '2022-01-21T17:32:28Z'
+            type: string
+            format: date-time
+          finishedAt:
+            description: When the capture job finished executing
+            example: '2022-01-21T17:45:28Z'
+            type: string
+            format: date-time
+          captureErrorBehaviour:
+            description: GS1-Capture-Error-Behaviour header value provided with POST data to capture
+            example: rollback
+            type: string
+            enum:
+            - rollback
+            - proceed
+      - oneOf:
+        - properties:
+            errors:
+              description: 'If the job was successful, the array is empty.
+
+                '
+              default: []
+              example: []
+              type: array
+              items:
+                $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        - properties:
+            errorFile:
+              description: 'Instead of returning errors in the `errors` property, the server can also write errors to a logfile,
+
+                and share the URL with the client.
+
+                '
+              example: ''
+              type: string
+              format: uri
+      xml:
+        name: EPCISCaptureJob
+        prefix: epcis
+        namespace: urn:epcglobal:epcis:xsd:2
+    GS1-Capture-Error-Behaviour:
+      example: rollback
+      type: string
+      default: rollback
+      enum:
+      - rollback
+      - proceed
+      - all
+    epcisQueryDocumentBody:
+      type: object
+      properties:
+        queryResults:
+          $ref: '#/components/schemas/queryResults'
+      required:
+      - queryResults
+    version:
+      type: string
+      pattern: ^\d+(\.\d+)*$
+    GS1-EPCIS-Capture-Limit:
+      example: 500
+      type: integer
+      minimum: 1
+    RFC7807ProblemResponseBody:
+      description: A response as specified in [RFC 7807](https://tools.ietf.org/html/rfc7807).
+      type: object
+      required:
+      - type
+      - title
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+      xml:
+        name: EPCISException
+        prefix: epcis
+        namespace: urn:epcglobal:epcis:xsd:2
+    source:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/source-dest-type'
+        source:
+          $ref: '#/components/schemas/uri'
+      required:
+      - type
+      - source
+      additionalProperties: false
+    boolean:
+      type: boolean
+    uri:
+      type: string
+      format: uri
+    persistentDisposition:
+      allOf:
+      - type: object
+        properties:
+          set:
+            type: array
+            items:
+              $ref: '#/components/schemas/disposition'
+            minItems: 1
+            uniqueItems: true
+          unset:
+            type: array
+            items:
+              $ref: '#/components/schemas/disposition'
+            minItems: 1
+            uniqueItems: true
+        additionalProperties: false
+      - anyOf:
+        - type: object
+          required:
+          - set
+        - type: object
+          required:
+          - unset
+    vocabularyElement:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/attribute'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/uri'
+      required:
+      - id
+    LDContext:
+      description: JSON-LD @context.
+      anyOf:
+      - type: array
+        items:
+          anyOf:
+          - type: string
+            format: uri
+          - type: object
+      - type: string
+        format: uri
+      - type: object
+    measurementType:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-nonGS1WebVoc-uri'
+      - type: string
+        enum:
+        - AbsoluteHumidity
+        - AbsorbedDose
+        - AbsorbedDoseRate
+        - Acceleration
+        - Radioactivity
+        - Altitude
+        - AmountOfSubstance
+        - AmountOfSubstancePerUnitVolume
+        - Angle
+        - AngularAcceleration
+        - AngularMomentum
+        - AngularVelocity
+        - Area
+        - Capacitance
+        - Conductance
+        - Conductivity
+        - Count
+        - Density
+        - Dimensionless
+        - DoseEquivalent
+        - DoseEquivalentRate
+        - DynamicViscosity
+        - ElectricCharge
+        - ElectricCurrent
+        - ElectricCurrentDensity
+        - ElectricFieldStrength
+        - Energy
+        - Exposure
+        - Force
+        - Frequency
+        - Illuminance
+        - Inductance
+        - Irradiance
+        - KinematicViscosity
+        - Length
+        - LinearMomentum
+        - Luminance
+        - LuminousFlux
+        - LuminousIntensity
+        - MagneticFlux
+        - MagneticFluxDensity
+        - MagneticVectorPotential
+        - Mass
+        - MassConcentration
+        - MassFlowRate
+        - MassPerAreaTime
+        - MemoryCapacity
+        - MolalityOfSolute
+        - MolarEnergy
+        - MolarMass
+        - MolarVolume
+        - Power
+        - Pressure
+        - RadiantFlux
+        - RadiantIntensity
+        - RelativeHumidity
+        - Resistance
+        - Resistivity
+        - SolidAngle
+        - SpecificVolume
+        - Speed
+        - SurfaceDensity
+        - SurfaceTension
+        - Temperature
+        - Time
+        - Torque
+        - Voltage
+        - Volume
+        - VolumeFlowRate
+        - VolumeFraction
+        - VolumetricFlux
+        - Wavenumber
+    epcisQueryDocument:
+      type: object
+      properties:
+        '@context':
+          $ref: '#/components/schemas/LDContext'
+        id:
+          $ref: '#/components/schemas/id'
+        type:
+          type: string
+          enum:
+          - EPCISQueryDocument
+        schemaVersion:
+          $ref: '#/components/schemas/version'
+        creationDate:
+          $ref: '#/components/schemas/time'
+        epcisBody:
+          $ref: '#/components/schemas/epcisQueryDocumentBody'
+      required:
+      - '@context'
+      - type
+      - epcisBody
+    Extended-Event:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            $ref: '#/components/schemas/vocab-uri'
+        required:
+        - type
+    sensorMetadata:
+      type: object
+      properties:
+        time:
+          $ref: '#/components/schemas/time'
+        deviceID:
+          $ref: '#/components/schemas/uri'
+        deviceMetadata:
+          $ref: '#/components/schemas/uri'
+        rawData:
+          $ref: '#/components/schemas/uri'
+        startTime:
+          $ref: '#/components/schemas/time'
+        endTime:
+          $ref: '#/components/schemas/time'
+        dataProcessingMethod:
+          $ref: '#/components/schemas/uri'
+        bizRules:
+          $ref: '#/components/schemas/uri'
+    GS1-EPCIS-Min:
+      allOf:
+      - example: 1.0.0
+      - $ref: '#/components/schemas/version'
+    PerPage:
+      description: 'This parameter helps to control the amount of data returned to the client through pagination.
+
+        In the case of EPCIS events, `perPage` specifies the maximum number of events in a response to the client.
+
+        It does not mandate that the server reaches this limit. For example, if the server sees that some EPCIS events are very
+
+        large, the server can decide to return fewer events to avoid creating an error because the response body is too
+
+        large.
+
+        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
+
+        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`. Depending on the
+
+        implementation, there can be a global upper limit for the `perPage` value that the client cannot override,
+
+        which should be stated in the documentation.
+
+        '
+      type: integer
+      default: 30
+    vocabulary:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/uri'
+        vocabularyElementList:
+          type: array
+          items:
+            $ref: '#/components/schemas/vocabularyElement'
+      required:
+      - type
+    vocab-nonGS1WebVoc-uri:
+      type: string
+      format: uri
+      pattern: ^(?!(https?:\/\/gs1\.org\/voc\/|https?:\/\/www\.gs1\.org\/voc\/))
+    Event:
+      type: object
+      properties:
+        '@context':
+          $ref: '#/components/schemas/LDContext'
+        eventTime:
+          $ref: '#/components/schemas/time'
+        recordTime:
+          $ref: '#/components/schemas/time'
+        eventTimeZoneOffset:
+          type: string
+          pattern: ^([+]|[-])((0[0-9]|1[0-3]):([0-5][0-9])|14:00)$
+        eventID:
+          $ref: '#/components/schemas/eventID'
+        certificationInfo:
+          $ref: '#/components/schemas/certificationInfo'
+        errorDeclaration:
+          $ref: '#/components/schemas/errorDeclaration'
+      required:
+      - eventTime
+      - eventTimeZoneOffset
+    epcList:
+      type: array
+      items:
+        $ref: '#/components/schemas/uri'
+      uniqueItems: true
+    action:
+      type: string
+      enum:
+      - OBSERVE
+      - ADD
+      - DELETE
+    string:
+      type: string
+    GS1-CBV-Version:
+      allOf:
+      - example: 2.0.1
+      - $ref: '#/components/schemas/version'
+    Link:
+      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
+
+        parameters.
+
+        '
+      type: string
+      format: uri
+      example: <https://example.com/epcis/events?perPage=30&nextPageToken=3A15506738749783AU6D7DENAKwM2gQRRwGrataeq>; rel="next"
+    TransformationEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - TransformationEvent
+          inputEPCList:
+            $ref: '#/components/schemas/epcList'
+          inputQuantityList:
+            $ref: '#/components/schemas/quantityList'
+          outputEPCList:
+            $ref: '#/components/schemas/epcList'
+          outputQuantityList:
+            $ref: '#/components/schemas/quantityList'
+          transformationID:
+            $ref: '#/components/schemas/uri'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          persistentDisposition:
+            $ref: '#/components/schemas/persistentDisposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+          ilmd:
+            $ref: '#/components/schemas/ilmd'
+        required:
+        - type
+      - anyOf:
+        - allOf:
+          - anyOf:
+            - type: object
+              properties:
+                inputEPCList:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+              required:
+              - inputEPCList
+            - type: object
+              properties:
+                inputQuantityList:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+              required:
+              - inputQuantityList
+          - anyOf:
+            - type: object
+              properties:
+                outputEPCList:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: string
+              required:
+              - outputEPCList
+            - type: object
+              properties:
+                outputQuantityList:
+                  type: array
+                  minItems: 1
+                  items:
+                    type: object
+              required:
+              - outputQuantityList
+        - anyOf:
+          - type: object
+            properties:
+              inputEPCList:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+            required:
+            - inputEPCList
+          - type: object
+            properties:
+              inputQuantityList:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+            required:
+            - inputQuantityList
+          - type: object
+            properties:
+              outputEPCList:
+                type: array
+                minItems: 1
+                items:
+                  type: string
+            required:
+            - outputEPCList
+          - type: object
+            properties:
+              outputQuantityList:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+            required:
+            - outputQuantityList
+          type: object
+          required:
+          - transformationID
+  headers:
+    Link:
+      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
+
+        parameters.
+
+        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
+
+        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`.
+
+        '
+      schema:
+        $ref: '#/components/schemas/Link'
+    GS1-Extensions:
+      description: Specific EPCIS or CBV extensions supported (e.g., for FIT).
+      schema:
+        $ref: '#/components/schemas/GS1-Extensions'
+    GS1-EPCIS-Version:
+      description: The EPCIS version.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Version'
+    GS1-CBV-Version:
+      description: The Core Business Vocabulary version.
+      schema:
+        $ref: '#/components/schemas/GS1-CBV-Version'
+    GS1-EPCIS-Capture-File-Size-Limit:
+      description: The maximum event document length in octets (8-bit bytes) for capture operations.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Capture-File-Size-Limit'
+    GS1-EPCIS-Capture-Limit:
+      description: The maximum number of EPCIS events that can be captured per call.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Capture-Limit'
+    GS1-Next-Page-Token-Expires:
+      description: The expiry time for `nextPageToken`.
+      schema:
+        $ref: '#/components/schemas/GS1-Next-Page-Token-Expires'
+  parameters:
+    PerPage:
+      in: query
+      name: perPage
+      schema:
+        $ref: '#/components/schemas/PerPage'
+    GS1-Capture-Error-Behaviour:
+      name: GS1-Capture-Error-Behaviour
+      description: 'A header to control how the capture interface will behave in case of an error:
+
+        - `rollback`: "All or nothing". Either the capture job is entirely successful or all EPCIS events are rejected.
+
+        - `proceed`: "Greedy capture". The capture interface tries to capture as many EPCIS events as possible, even if there are errors.
+
+        The default behaviour is `rollback`, as in EPCIS 1.2.
+
+        '
+      in: header
+      required: false
+      schema:
+        $ref: '#/components/schemas/GS1-Capture-Error-Behaviour'
+    GS1-EPCIS-Max:
+      in: header
+      name: GS1-EPCIS-Max
+      description: The highest EPCIS version supported.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Max'
+    GS1-Extensions:
+      in: header
+      name: GS1-Extensions
+      description: 'Specific EPCIS or CBV extensions supported (e.g., for FIT).
+
+        '
+      schema:
+        $ref: '#/components/schemas/GS1-Extensions'
+      style: simple
+      explode: true
+    GS1-EPCIS-Version:
+      in: header
+      name: GS1-EPCIS-Version
+      description: 'The EPCIS version.
+
+        '
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Version'
+    NextPageToken:
+      in: query
+      name: nextPageToken
+      schema:
+        $ref: '#/components/schemas/NextPageToken'
+    GS1-EPCIS-Min:
+      in: header
+      name: GS1-EPCIS-Min
+      description: 'The lowest EPCIS version supported.
+
+        '
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Min'
+    GS1-CBV-Version:
+      in: header
+      name: GS1-CBV-Version
+      description: 'The Core Business Vocabulary version.
+
+        '
+      schema:
+        $ref: '#/components/schemas/GS1-CBV-Version'
+  responses:
+    406NotAcceptable:
+      description: "The server cannot return the response as requested. \n"
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:NotAcceptableException
+              title: Conflicting request and response headers
+              status: 406
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 406
+                  default: 406
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:NotAcceptableException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:NotAcceptableException
+              title: Conflicting request and response headers
+              status: 406
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 406
+                  default: 406
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:NotAcceptableException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    409ResourceAlreadyExistsException:
+      description: 'A resource with the provided identifier already exists. E.g., a named query or an event.
+
+        '
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:ResourceAlreadyExistsException
+              title: A resource with the provided identifier already exists.
+              status: 409
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 406
+                  default: 406
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:ResourceAlreadyExistsException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:ResourceAlreadyExistsException
+              title: A resource with the provided identifier already exists.
+              status: 409
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 406
+                  default: 406
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:ResourceAlreadyExistsException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    413CapturePayloadTooLarge:
+      headers:
+        GS1-EPCIS-Capture-Limit:
+          $ref: '#/components/headers/GS1-EPCIS-Capture-Limit'
+        GS1-EPCIS-Capture-File-Size-Limit:
+          $ref: '#/components/headers/GS1-EPCIS-Capture-File-Size-Limit'
+      description: 'The `POST` request is too large. It exceeds the limits set in `GS1-EPCIS-Capture-Limit` and/or
+
+        `GS1-EPCIS-Capture-File-Size-Limit`.
+
+        '
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:CaptureLimitExceededException
+              title: Capture Payload too large
+              status: 413
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 413
+                  default: 413
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:CaptureLimitExceededException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:CaptureLimitExceededException
+              title: Capture Payload too large
+              status: 413
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 413
+                  default: 413
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:CaptureLimitExceededException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    401UnauthorizedRequest:
+      description: Authorization information is missing or invalid.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Unauthorised request
+              status: 401
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 401
+                  default: 401
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Unauthorised request
+              status: 401
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 401
+                  default: 401
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    415UnsupportedMediaType:
+      description: 'The client sent data in a format that is not supported by the server.
+
+        '
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:UnsupportedMediaTypeException
+              title: Unsupported Media Type
+              status: 415
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 415
+                  default: 415
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:UnsupportedMediaTypeException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:UnsupportedMediaTypeException
+              title: Unsupported Media Type
+              status: 415
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 415
+                  default: 415
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:IUnsupportedMediaTypeException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    500ImplementationException:
+      description: An error occurred on the backend.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:ImplementationException
+              title: A server-side error occurred
+              status: 500
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 500
+                  default: 500
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:ImplementationException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:ImplementationException
+              title: A server-side error occurred
+              status: 500
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 500
+                  default: 500
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:ImplementationException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    404ResourceNotFound:
+      description: At least one resource was not found. For example, the EPCIS event does not exist or the query does not exist.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:NoSuchResourceException
+              title: Resource not found
+              status: 404
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 404
+                  default: 404
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:NoSuchNameException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:NoSuchNameException
+              title: Resource not found
+              status: 404
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 404
+                  default: 404
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:NoSuchNameException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    403ClientUnauthorized:
+      description: Client is unauthorized to access this resource.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Access to resource forbidden
+              status: 403
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 403
+                  default: 403
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Access to resource forbidden
+              status: 403
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 403
+                  default: 403
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
