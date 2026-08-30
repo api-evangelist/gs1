@@ -140,6 +140,8 @@ apis:
   humanURL: https://ref.gs1.org/standards/epcis/
   baseURL: https://id.gs1.org
   tags:
+  - Event
+  tags_raw:
   - Events
   properties:
   - type: OpenAPI
@@ -171,6 +173,8 @@ apis:
   humanURL: https://ref.gs1.org/standards/epcis/
   baseURL: https://id.gs1.org
   tags:
+  - Query
+  tags_raw:
   - Queries
   properties:
   - type: OpenAPI
@@ -195,6 +199,8 @@ apis:
   humanURL: https://ref.gs1.org/standards/epcis/
   baseURL: https://id.gs1.org
   tags:
+  - Subscription
+  tags_raw:
   - Subscriptions
   properties:
   - type: OpenAPI
