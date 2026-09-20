@@ -11,8 +11,20 @@ capability_model:
   attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
     CC BY 4.0
   notice: NOTICE
-edge_count: 1
+edge_count: 2
 edges:
+- tag: Events
+  spec_file: gs1-events-api-openapi.yml
+  capability_id: BC-2380.20
+  capability_id_l1: BC-2380
+  capability_name: Lot & Batch Traceability Management
+  confidence: 0.75
+  evidence: '"Returns EPCIS events matching the specified electronic product code"; "Returns all EPCIS
+    events related to the business step"; schemas: bizStep, bizLocation, disposition'
+  reason: EPCIS event retrieval is supply-chain visibility event capture — the frame's lot/batch traceability
+    capability explicitly names 'GS1 EPCIS event capture'. Some ambiguity vs generic supply chain visibility
+    (BC-520.60), but the candidate list names EPCIS directly under traceability.
+  recovered_from: vertical-retail-consumer-goods-edges.json
 - tag: Capture
   spec_file: gs1-capture-api-openapi.yml
   capability_id: BC-2510.10
