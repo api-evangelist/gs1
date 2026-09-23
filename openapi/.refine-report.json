@@ -1,0 +1,30 @@
+{
+  "provider": "gs1",
+  "sources": [
+    "_original/gs1-epcis-2-0-1-openapi.json"
+  ],
+  "outputs": [
+    "gs1-capture-api-openapi.yml",
+    "gs1-discovery-api-openapi.yml",
+    "gs1-events-api-openapi.yml",
+    "gs1-queries-api-openapi.yml",
+    "gs1-subscriptions-api-openapi.yml",
+    "gs1-top-level-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "gs1-epcis-2-0-1-openapi.json: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "gs1-capture-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "gs1-discovery-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "gs1-events-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "gs1-queries-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "gs1-subscriptions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "gs1-top-level-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}
