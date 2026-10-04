@@ -339,179 +339,6 @@ paths:
           $ref: '#/components/responses/500ImplementationException'
 components:
   schemas:
-    time:
-      type: string
-      format: date-time
-    GS1-Query-Hour:
-      description: 'Specifies that the query time must have a matching hour value. The range for this parameter is 0 through 23,
-
-        inclusive, with 0 denoting the hour that begins at midnight, and 23 denoting the hour that ends at midnight.
-
-        '
-      example: 1
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-23]))
-    decimal:
-      type: number
-    queryResults:
-      type: object
-      properties:
-        queryName:
-          type: string
-        subscriptionID:
-          type: string
-        resultsBody:
-          $ref: '#/components/schemas/resultsBody'
-      required:
-      - queryName
-      - resultsBody
-    bizTransaction-type:
-      anyOf:
-      - $ref: '#/components/schemas/vocab-other-uri'
-      - type: string
-        enum:
-        - bol
-        - cert
-        - desadv
-        - inv
-        - pedigree
-        - po
-        - poc
-        - prodorder
-        - recadv
-        - rma
-        - testprd
-        - testres
-        - upevt
-    GS1-Query-Stream:
-      type: boolean
-      description: 'If no schedule is specified and `stream` is `true`, the standing subscription SHALL report immediately whenever a
-
-        captured EPCIS event matches the query criteria.
-
-        '
-      default: true
-      enum:
-      - true
-    NextPageToken:
-      description: 'Parameter that points to the next list of results when requesting a list of events that is larger than the value
-
-        specified with the `perPage` parameter. Some technologies refer to this as scrolling.
-
-        A `nextPageToken` may be invalidated through timeout. It is up to the specific implementation to provide
-
-        the mechanisms for invalidating tokens.
-
-        '
-      type: string
-      example: 3A15506738749783AU6D7DENAKwM2gQRRwGrataeq
-    uom:
-      type: string
-      pattern: ^[A-Z0-9]{2,3}$
-    QueryScheduleSubscription:
-      description: "A scheduled query subscription is a time-based query execution scheduler. EPCIS 2.0 scheduled queries are scheduled\nin the same manner as cron jobs.\nFor example, this query subscription is scheduled to trigger every morning at 1.05am. By setting\n`reportIfEmpty` to `true`, the client's callback URL will be called even if there are no new events that match\nthe query.\n```\nPOST /queries/MyQuery/subscriptions\n{\n  \"dest\": \"https://client.example.com/queryCallback\",\n  \"signatureToken\": \"13df38d8275b13f05704629e5f1cf3d45d6132d5\",\n  \"reportIfEmpty\": true,\n  \"schedule\": {\n    \"hour\":\"1\",\n    \"minute\": \"5\"\n  }\n}\n```\n"
-      type: object
-      example:
-        schedule:
-          hour: '1'
-          minute: '5'
-      required:
-      - schedule
-      properties:
-        reportIfEmpty:
-          $ref: '#/components/schemas/GS1-Query-ReportIfEmpty'
-        schedule:
-          type: object
-          properties:
-            second:
-              $ref: '#/components/schemas/GS1-Query-Second'
-            minute:
-              $ref: '#/components/schemas/GS1-Query-Minute'
-            hour:
-              $ref: '#/components/schemas/GS1-Query-Hour'
-            dayOfMonth:
-              $ref: '#/components/schemas/GS1-Query-DayOfMonth'
-            month:
-              $ref: '#/components/schemas/GS1-Query-Month'
-            dayOfWeek:
-              $ref: '#/components/schemas/GS1-Query-DayOfWeek'
-    QueryStreamSubscription:
-      description: "If no query schedule is specified, the client must explicitly set `stream` to `true`. This restriction is to\nprevent clients from accidentally subscribing to EPCIS event streams.\nExample:\n```\nPOST /queries/MyQuery/subscriptions\n{\n  \"dest\": \"https://client.example.com/queryCallback\",\n  \"signatureToken\": \"13df38d8275b13f05704629e5f1cf3d45d6132d5\",\n  \"stream\": true\n}\n```\n"
-      type: object
-      example:
-        stream: true
-      required:
-      - stream
-      properties:
-        stream:
-          $ref: '#/components/schemas/GS1-Query-Stream'
-    PerPage:
-      description: 'This parameter helps to control the amount of data returned to the client through pagination.
-
-        In the case of EPCIS events, `perPage` specifies the maximum number of events in a response to the client.
-
-        It does not mandate that the server reaches this limit. For example, if the server sees that some EPCIS events are very
-
-        large, the server can decide to return fewer events to avoid creating an error because the response body is too
-
-        large.
-
-        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
-
-        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`. Depending on the
-
-        implementation, there can be a global upper limit for the `perPage` value that the client cannot override,
-
-        which should be stated in the documentation.
-
-        '
-      type: integer
-      default: 30
-    GS1-Query-InitialRecordTime:
-      description: 'Used to specify a time to constrain what resources are considered when processing a query
-
-        subscription. This value only applies the first time a subscriber receives events. If omitted, the default
-
-        value is the current time.
-
-        '
-      type: string
-      format: date-time
-      example: '2020-04-04T20:33:31.116-06:00'
-    LDContext:
-      description: JSON-LD @context.
-      anyOf:
-      - type: array
-        items:
-          anyOf:
-          - type: string
-            format: uri
-          - type: object
-      - type: string
-        format: uri
-      - type: object
-    sensorAlertType:
-      anyOf:
-      - $ref: '#/components/schemas/vocab-nonGS1WebVoc-uri'
-      - type: string
-        enum:
-        - ALARM_CONDITION
-        - ERROR_CONDITION
-    certificationInfo:
-      anyOf:
-      - type: array
-        items:
-          $ref: '#/components/schemas/uri'
-      - $ref: '#/components/schemas/uri'
-    bizLocation:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/uri'
-      required:
-      - id
-    eventID:
-      $ref: '#/components/schemas/uri'
     readPoint:
       type: object
       properties:
@@ -519,150 +346,20 @@ components:
           $ref: '#/components/schemas/uri'
       required:
       - id
-    disposition:
-      anyOf:
-      - $ref: '#/components/schemas/vocab-other-uri'
-      - type: string
-        enum:
-        - active
-        - container_closed
-        - damaged
-        - destroyed
-        - dispensed
-        - disposed
-        - encoded
-        - expired
-        - in_progress
-        - in_transit
-        - inactive
-        - no_pedigree_match
-        - non_sellable_other
-        - partially_dispensed
-        - recalled
-        - reserved
-        - retail_sold
-        - returned
-        - sellable_accessible
-        - sellable_not_accessible
-        - stolen
-        - unknown
-        - available
-        - completeness_verified
-        - completeness_inferred
-        - conformant
-        - container_open
-        - mismatch_instance
-        - mismatch_class
-        - mismatch_quantity
-        - needs_replacement
-        - non_conformant
-        - unavailable
-    Extended-Event:
-      allOf:
-      - $ref: '#/components/schemas/Event'
-      - type: object
-        properties:
-          type:
-            $ref: '#/components/schemas/vocab-uri'
-        required:
-        - type
-    GS1-EPC-Format:
-      example: Always_GS1_Digital_Link
+    hexBinary:
       type: string
-      enum:
-      - No_Preference
-      - Always_GS1_Digital_Link
-      - Always_EPC_URN
-      - Never_Translates
-    attribute:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/uri'
-        attribute:
-          anyOf:
-          - type: number
-          - type: string
-          - type: object
-      required:
-      - id
-    AbstractQuerySubscriptionResponse:
-      example:
-        dest: https://client.example.com/queryCallback
-        subscriptionID: df5a33e3-5aa3-4403-ae01-99b83234e27b
-        stream: true
-        createdAt: '2017-08-21T17:32:28Z'
-        lastNotifiedAt: '2022-01-08T06:51:21.889Z'
-      type: object
-      description: 'This schema contains shared features of EPCIS query subscriptions response.
-
-        '
-      required:
-      - dest
-      - subscriptionID
-      - createdAt
-      properties:
-        dest:
-          $ref: '#/components/schemas/dest'
-        subscriptionID:
-          $ref: '#/components/schemas/subscriptionID'
-        createdAt:
-          example: '2022-02-27T17:32:28Z'
-          type: string
-          format: date-time
-        lastNotifiedAt:
-          example: '2022-07-09T17:32:28Z'
-          type: string
-          format: date-time
-          description: The last time the target client was notified and responded with a 200 OK.
-        initialRecordTime:
-          $ref: '#/components/schemas/GS1-Query-InitialRecordTime'
-        minRecordTime:
-          $ref: '#/components/schemas/GS1-Query-Min-Record-Time'
-        epcFormat:
-          $ref: '#/components/schemas/GS1-EPC-Format'
-    error-reason:
-      anyOf:
-      - $ref: '#/components/schemas/vocab-other-uri'
-      - type: string
-        enum:
-        - did_not_occur
-        - incorrect_data
-    source:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/source-dest-type'
-        source:
-          $ref: '#/components/schemas/uri'
-      required:
-      - type
-      - source
-      additionalProperties: false
-    GS1-Query-Second:
-      description: 'Specifies that the query time must have a matching seconds value. The range for this parameter is 0
-
-        through 59, inclusive.
-
-        '
-      example: 0
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-59]))
-    version:
-      type: string
-      pattern: ^\d+(\.\d+)*$
-    vocab-uri:
+      pattern: ^[A-Fa-f0-9]+$
+    dest:
+      description: Callback URL to receive EPCIS resources and errors.
       type: string
       format: uri
-    sensorElement:
-      type: object
-      properties:
-        sensorMetadata:
-          $ref: '#/components/schemas/sensorMetadata'
-        sensorReport:
-          $ref: '#/components/schemas/sensorReportList'
-      required:
-      - sensorReport
+      example: https://client.example.com/queryCallback
+    string:
+      type: string
+    vocab-nonGS1WebVoc-uri:
+      type: string
+      format: uri
+      pattern: ^(?!(https?:\/\/gs1\.org\/voc\/|https?:\/\/www\.gs1\.org\/voc\/))
     AssociationEvent:
       allOf:
       - $ref: '#/components/schemas/Event'
@@ -736,82 +433,68 @@ components:
             action:
               type: string
               pattern: ^DELETE$
-    AggregationEvent:
-      allOf:
-      - $ref: '#/components/schemas/Event'
-      - type: object
-        properties:
-          type:
-            type: string
-            enum:
-            - AggregationEvent
-          parentID:
-            $ref: '#/components/schemas/uri'
-          childEPCs:
-            type: array
-            items:
-              $ref: '#/components/schemas/uri'
-          childQuantityList:
-            type: array
-            items:
-              $ref: '#/components/schemas/quantityElement'
-          action:
-            $ref: '#/components/schemas/action'
-          bizStep:
-            $ref: '#/components/schemas/bizStep'
-          disposition:
-            $ref: '#/components/schemas/disposition'
-          readPoint:
-            $ref: '#/components/schemas/readPoint'
-          bizLocation:
-            $ref: '#/components/schemas/bizLocation'
-          bizTransactionList:
-            type: array
-            items:
-              $ref: '#/components/schemas/bizTransaction'
-          sourceList:
-            type: array
-            items:
-              $ref: '#/components/schemas/source'
-          destinationList:
-            type: array
-            items:
-              $ref: '#/components/schemas/destination'
-          sensorElementList:
-            type: array
-            items:
-              $ref: '#/components/schemas/sensorElement'
-        required:
-        - type
-        - action
-      - anyOf:
-        - type: object
-          properties:
-            childEPCs:
-              type: array
-              minItems: 1
-              items:
-                $ref: '#/components/schemas/id'
-          required:
-          - childEPCs
-        - type: object
-          properties:
-            childQuantityList:
-              type: array
-              minItems: 1
-              items:
-                $ref: '#/components/schemas/quantityElement'
-          required:
-          - childQuantityList
-        - type: object
-          properties:
-            action:
-              type: string
-              pattern: ^DELETE$
     quantityList:
       type: array
       items:
         $ref: '#/components/schemas/quantityElement'
+    LDContext:
+      description: JSON-LD @context.
+      anyOf:
+      - type: array
+        items:
+          anyOf:
+          - type: string
+            format: uri
+          - type: object
+      - type: string
+        format: uri
+      - type: object
+    GS1-Query-Minute:
+      description: 'Specifies that the query time must have a matching minute value. The range for this parameter is 0 through 59,
+
+        inclusive.
+
+        '
+      example: 5
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-59]))
+    EPCISEvent:
+      description: "EPCIS Event. It must validate against the normative \n<a href=\"../epcis-json-schema.json\">EPCIS JSON Schema</a> or <a href=\"../Ontology/EPCIS-SHACL.ttl\">EPCIS SHACL</a>. \n"
+      oneOf:
+      - $ref: '#/components/schemas/ObjectEvent'
+      - $ref: '#/components/schemas/AggregationEvent'
+      - $ref: '#/components/schemas/TransactionEvent'
+      - $ref: '#/components/schemas/TransformationEvent'
+      - $ref: '#/components/schemas/AssociationEvent'
+      - $ref: '#/components/schemas/Extended-Event'
+    action:
+      type: string
+      enum:
+      - OBSERVE
+      - ADD
+      - DELETE
+    PerPage:
+      description: 'This parameter helps to control the amount of data returned to the client through pagination.
+
+        In the case of EPCIS events, `perPage` specifies the maximum number of events in a response to the client.
+
+        It does not mandate that the server reaches this limit. For example, if the server sees that some EPCIS events are very
+
+        large, the server can decide to return fewer events to avoid creating an error because the response body is too
+
+        large.
+
+        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
+
+        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`. Depending on the
+
+        implementation, there can be a global upper limit for the `perPage` value that the client cannot override,
+
+        which should be stated in the documentation.
+
+        '
+      type: integer
+      default: 30
     bizStep:
       anyOf:
       - $ref: '#/components/schemas/vocab-other-uri'
@@ -858,17 +541,289 @@ components:
         - void_shipping
         - sensor_reporting
         - sampling
-    GS1-Extensions:
-      example: 'example-epc-ext=http://org1.example.com/epcis/,
+    epcList:
+      type: array
+      items:
+        $ref: '#/components/schemas/uri'
+      uniqueItems: true
+    QueryName:
+      description: Unique query name.
+      type: string
+      example: myQuery
+    GS1-CBV-XML-Format:
+      example: Always_Web_URI
+      type: string
+      enum:
+      - No_Preference
+      - Always_Web_URI
+      - Always_URN
+      - Never_Translates
+    disposition:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - active
+        - container_closed
+        - damaged
+        - destroyed
+        - dispensed
+        - disposed
+        - encoded
+        - expired
+        - in_progress
+        - in_transit
+        - inactive
+        - no_pedigree_match
+        - non_sellable_other
+        - partially_dispensed
+        - recalled
+        - reserved
+        - retail_sold
+        - returned
+        - sellable_accessible
+        - sellable_not_accessible
+        - stolen
+        - unknown
+        - available
+        - completeness_verified
+        - completeness_inferred
+        - conformant
+        - container_open
+        - mismatch_instance
+        - mismatch_class
+        - mismatch_quantity
+        - needs_replacement
+        - non_conformant
+        - unavailable
+    bizTransaction:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/bizTransaction-type'
+        bizTransaction:
+          $ref: '#/components/schemas/uri'
+      required:
+      - bizTransaction
+      additionalProperties: false
+    GS1-Query-DayOfMonth:
+      description: 'Specifies that the query time must have a matching day of month value. The range for this parameter is 1 through
 
-        example-epc-ext2=http://vendor.example.com/epcis/
+        31, inclusive.
 
         '
-      type: object
-    vocab-nonGS1WebVoc-uri:
+      example: 1
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-31]))
+    eventID:
+      $ref: '#/components/schemas/uri'
+    GS1-Query-Month:
+      description: 'Specifies that the query time must have a matching month value. The range for this parameter is 1 through 12,
+
+        inclusive.
+
+        '
+      example: 1
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-12]))
+    uri:
       type: string
       format: uri
-      pattern: ^(?!(https?:\/\/gs1\.org\/voc\/|https?:\/\/www\.gs1\.org\/voc\/))
+    Link:
+      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
+
+        parameters.
+
+        '
+      type: string
+      format: uri
+      example: <https://example.com/epcis/events?perPage=30&nextPageToken=3A15506738749783AU6D7DENAKwM2gQRRwGrataeq>; rel="next"
+    Event:
+      type: object
+      properties:
+        '@context':
+          $ref: '#/components/schemas/LDContext'
+        eventTime:
+          $ref: '#/components/schemas/time'
+        recordTime:
+          $ref: '#/components/schemas/time'
+        eventTimeZoneOffset:
+          type: string
+          pattern: ^([+]|[-])((0[0-9]|1[0-3]):([0-5][0-9])|14:00)$
+        eventID:
+          $ref: '#/components/schemas/eventID'
+        certificationInfo:
+          $ref: '#/components/schemas/certificationInfo'
+        errorDeclaration:
+          $ref: '#/components/schemas/errorDeclaration'
+      required:
+      - eventTime
+      - eventTimeZoneOffset
+    vocab-other-uri:
+      type: string
+      format: uri
+      pattern: ^(?!(urn:epcglobal:cbv|https?:\/\/ns\.gs1\.org/cbv\/))
+    sensorReportList:
+      type: array
+      items:
+        $ref: '#/components/schemas/sensorReport'
+      minItems: 1
+    bizTransaction-type:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - bol
+        - cert
+        - desadv
+        - inv
+        - pedigree
+        - po
+        - poc
+        - prodorder
+        - recadv
+        - rma
+        - testprd
+        - testres
+        - upevt
+    uom:
+      type: string
+      pattern: ^[A-Z0-9]{2,3}$
+    destination:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/source-dest-type'
+        destination:
+          $ref: '#/components/schemas/uri'
+      required:
+      - type
+      - destination
+      additionalProperties: false
+    sensorMetadata:
+      type: object
+      properties:
+        time:
+          $ref: '#/components/schemas/time'
+        deviceID:
+          $ref: '#/components/schemas/uri'
+        deviceMetadata:
+          $ref: '#/components/schemas/uri'
+        rawData:
+          $ref: '#/components/schemas/uri'
+        startTime:
+          $ref: '#/components/schemas/time'
+        endTime:
+          $ref: '#/components/schemas/time'
+        dataProcessingMethod:
+          $ref: '#/components/schemas/uri'
+        bizRules:
+          $ref: '#/components/schemas/uri'
+    decimal:
+      type: number
+    GS1-Query-ReportIfEmpty:
+      example: false
+      type: boolean
+      default: false
+      description: Flag to specify subscribed clients should be notified if the query result is empty.
+    GS1-EPC-Format:
+      example: Always_GS1_Digital_Link
+      type: string
+      enum:
+      - No_Preference
+      - Always_GS1_Digital_Link
+      - Always_EPC_URN
+      - Never_Translates
+    errorDeclaration:
+      type: object
+      properties:
+        declarationTime:
+          $ref: '#/components/schemas/time'
+        reason:
+          $ref: '#/components/schemas/error-reason'
+        correctiveEventIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/eventID'
+      required:
+      - declarationTime
+    resultsBody:
+      type: object
+      properties:
+        eventList:
+          $ref: '#/components/schemas/eventList'
+        vocabularyList:
+          $ref: '#/components/schemas/vocabularyList'
+      required:
+      - eventList
+    GS1-Query-Stream:
+      type: boolean
+      description: 'If no schedule is specified and `stream` is `true`, the standing subscription SHALL report immediately whenever a
+
+        captured EPCIS event matches the query criteria.
+
+        '
+      default: true
+      enum:
+      - true
+    source-dest-type:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - owning_party
+        - possessing_party
+        - location
+    eventList:
+      type: array
+      items:
+        $ref: '#/components/schemas/EPCISEvent'
+    component:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - x
+        - y
+        - z
+        - axial_distance
+        - azimuth
+        - height
+        - spherical_radius
+        - polar_angle
+        - elevation_angle
+        - easting
+        - northing
+        - latitude
+        - longitude
+        - altitude
+    epcisQueryDocumentBody:
+      type: object
+      properties:
+        queryResults:
+          $ref: '#/components/schemas/queryResults'
+      required:
+      - queryResults
+    version:
+      type: string
+      pattern: ^\d+(\.\d+)*$
+    QueryStreamSubscription:
+      description: "If no query schedule is specified, the client must explicitly set `stream` to `true`. This restriction is to\nprevent clients from accidentally subscribing to EPCIS event streams.\nExample:\n```\nPOST /queries/MyQuery/subscriptions\n{\n  \"dest\": \"https://client.example.com/queryCallback\",\n  \"signatureToken\": \"13df38d8275b13f05704629e5f1cf3d45d6132d5\",\n  \"stream\": true\n}\n```\n"
+      type: object
+      example:
+        stream: true
+      required:
+      - stream
+      properties:
+        stream:
+          $ref: '#/components/schemas/GS1-Query-Stream'
+    bizLocation:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+      required:
+      - id
     TransactionEvent:
       allOf:
       - $ref: '#/components/schemas/Event'
@@ -943,6 +898,140 @@ components:
             action:
               type: string
               pattern: ^DELETE$
+    GS1-Next-Page-Token-Expires:
+      example: '2017-07-21T17:32:28Z'
+      type: string
+      format: date-time
+    quantityElement:
+      type: object
+      properties:
+        epcClass:
+          $ref: '#/components/schemas/uri'
+        quantity:
+          $ref: '#/components/schemas/decimal'
+        uom:
+          $ref: '#/components/schemas/uom'
+      required:
+      - epcClass
+      additionalProperties: false
+    AggregationEvent:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            type: string
+            enum:
+            - AggregationEvent
+          parentID:
+            $ref: '#/components/schemas/uri'
+          childEPCs:
+            type: array
+            items:
+              $ref: '#/components/schemas/uri'
+          childQuantityList:
+            type: array
+            items:
+              $ref: '#/components/schemas/quantityElement'
+          action:
+            $ref: '#/components/schemas/action'
+          bizStep:
+            $ref: '#/components/schemas/bizStep'
+          disposition:
+            $ref: '#/components/schemas/disposition'
+          readPoint:
+            $ref: '#/components/schemas/readPoint'
+          bizLocation:
+            $ref: '#/components/schemas/bizLocation'
+          bizTransactionList:
+            type: array
+            items:
+              $ref: '#/components/schemas/bizTransaction'
+          sourceList:
+            type: array
+            items:
+              $ref: '#/components/schemas/source'
+          destinationList:
+            type: array
+            items:
+              $ref: '#/components/schemas/destination'
+          sensorElementList:
+            type: array
+            items:
+              $ref: '#/components/schemas/sensorElement'
+        required:
+        - type
+        - action
+      - anyOf:
+        - type: object
+          properties:
+            childEPCs:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/id'
+          required:
+          - childEPCs
+        - type: object
+          properties:
+            childQuantityList:
+              type: array
+              minItems: 1
+              items:
+                $ref: '#/components/schemas/quantityElement'
+          required:
+          - childQuantityList
+        - type: object
+          properties:
+            action:
+              type: string
+              pattern: ^DELETE$
+    GS1-Query-InitialRecordTime:
+      description: 'Used to specify a time to constrain what resources are considered when processing a query
+
+        subscription. This value only applies the first time a subscriber receives events. If omitted, the default
+
+        value is the current time.
+
+        '
+      type: string
+      format: date-time
+      example: '2020-04-04T20:33:31.116-06:00'
+    AbstractQuerySubscriptionResponse:
+      example:
+        dest: https://client.example.com/queryCallback
+        subscriptionID: df5a33e3-5aa3-4403-ae01-99b83234e27b
+        stream: true
+        createdAt: '2017-08-21T17:32:28Z'
+        lastNotifiedAt: '2022-01-08T06:51:21.889Z'
+      type: object
+      description: 'This schema contains shared features of EPCIS query subscriptions response.
+
+        '
+      required:
+      - dest
+      - subscriptionID
+      - createdAt
+      properties:
+        dest:
+          $ref: '#/components/schemas/dest'
+        subscriptionID:
+          $ref: '#/components/schemas/subscriptionID'
+        createdAt:
+          example: '2022-02-27T17:32:28Z'
+          type: string
+          format: date-time
+        lastNotifiedAt:
+          example: '2022-07-09T17:32:28Z'
+          type: string
+          format: date-time
+          description: The last time the target client was notified and responded with a 200 OK.
+        initialRecordTime:
+          $ref: '#/components/schemas/GS1-Query-InitialRecordTime'
+        minRecordTime:
+          $ref: '#/components/schemas/GS1-Query-Min-Record-Time'
+        epcFormat:
+          $ref: '#/components/schemas/GS1-EPC-Format'
     RFC7807ProblemResponseBody:
       description: A response as specified in [RFC 7807](https://tools.ietf.org/html/rfc7807).
       type: object
@@ -966,76 +1055,116 @@ components:
         name: EPCISException
         prefix: epcis
         namespace: urn:epcglobal:epcis:xsd:2
-    QueryName:
-      description: Unique query name.
-      type: string
-      example: myQuery
-    component:
+    AbstractQuerySubscription:
+      example:
+        dest: https://client.example.com/queryCallback
+        signatureToken: 13df38d8275b13f05704629e5f1cf3d45d6132d5
+      type: object
+      description: 'This schema contains shared features of EPCIS query subscriptions. If the schema is used in a response, the
+
+        `secret` should not be fully revealed.
+
+        '
+      required:
+      - dest
+      - secret
+      properties:
+        dest:
+          $ref: '#/components/schemas/dest'
+        signatureToken:
+          example: 13df38d8275b13f05704629e5f1cf3d45d6132d5
+          type: string
+          description: Secret generated by the client for the server.
+        initialRecordTime:
+          $ref: '#/components/schemas/GS1-Query-InitialRecordTime'
+    certificationInfo:
       anyOf:
-      - $ref: '#/components/schemas/vocab-other-uri'
-      - type: string
-        enum:
-        - x
-        - y
-        - z
-        - axial_distance
-        - azimuth
-        - height
-        - spherical_radius
-        - polar_angle
-        - elevation_angle
-        - easting
-        - northing
-        - latitude
-        - longitude
-        - altitude
-    dest:
-      description: Callback URL to receive EPCIS resources and errors.
-      type: string
-      format: uri
-      example: https://client.example.com/queryCallback
-    errorDeclaration:
+      - type: array
+        items:
+          $ref: '#/components/schemas/uri'
+      - $ref: '#/components/schemas/uri'
+    queryResults:
       type: object
       properties:
-        declarationTime:
-          $ref: '#/components/schemas/time'
-        reason:
-          $ref: '#/components/schemas/error-reason'
-        correctiveEventIDs:
-          type: array
-          items:
-            $ref: '#/components/schemas/eventID'
+        queryName:
+          type: string
+        subscriptionID:
+          type: string
+        resultsBody:
+          $ref: '#/components/schemas/resultsBody'
       required:
-      - declarationTime
-    GS1-Next-Page-Token-Expires:
-      example: '2017-07-21T17:32:28Z'
+      - queryName
+      - resultsBody
+    source:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/source-dest-type'
+        source:
+          $ref: '#/components/schemas/uri'
+      required:
+      - type
+      - source
+      additionalProperties: false
+    GS1-Signature:
+      description: "Used to sign events sent by the repository to subscribers. The choice of signature type is implementation specific but examples would be using HMAC with SHA-256 directly or a wrapper supporting various symmetric or asymetric \ncryptographic algorithms such as Json Web Signature (JWS). \n"
       type: string
-      format: date-time
+      example: eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ
+    subscriptionID:
+      description: The ID of a WebHook subscription.
+      example: df5a33e3-5aa3-4403-ae01-99b83234e27b
+      type: string
     vocabularyList:
       type: array
       items:
         $ref: '#/components/schemas/vocabulary'
-    Event:
+    vocabularyElement:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/attribute'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/uri'
+      required:
+      - id
+    ilmd:
+      type: object
+    epcisQueryDocument:
       type: object
       properties:
         '@context':
           $ref: '#/components/schemas/LDContext'
-        eventTime:
-          $ref: '#/components/schemas/time'
-        recordTime:
-          $ref: '#/components/schemas/time'
-        eventTimeZoneOffset:
+        id:
+          $ref: '#/components/schemas/id'
+        type:
           type: string
-          pattern: ^([+]|[-])((0[0-9]|1[0-3]):([0-5][0-9])|14:00)$
-        eventID:
-          $ref: '#/components/schemas/eventID'
-        certificationInfo:
-          $ref: '#/components/schemas/certificationInfo'
-        errorDeclaration:
-          $ref: '#/components/schemas/errorDeclaration'
+          enum:
+          - EPCISQueryDocument
+        schemaVersion:
+          $ref: '#/components/schemas/version'
+        creationDate:
+          $ref: '#/components/schemas/time'
+        epcisBody:
+          $ref: '#/components/schemas/epcisQueryDocumentBody'
       required:
-      - eventTime
-      - eventTimeZoneOffset
+      - '@context'
+      - type
+      - epcisBody
+    GS1-Query-Hour:
+      description: 'Specifies that the query time must have a matching hour value. The range for this parameter is 0 through 23,
+
+        inclusive, with 0 denoting the hour that begins at midnight, and 23 denoting the hour that ends at midnight.
+
+        '
+      example: 1
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-23]))
     TransformationEvent:
       allOf:
       - $ref: '#/components/schemas/Event'
@@ -1165,34 +1294,287 @@ components:
           type: object
           required:
           - transformationID
+    QueryScheduleSubscription:
+      description: "A scheduled query subscription is a time-based query execution scheduler. EPCIS 2.0 scheduled queries are scheduled\nin the same manner as cron jobs.\nFor example, this query subscription is scheduled to trigger every morning at 1.05am. By setting\n`reportIfEmpty` to `true`, the client's callback URL will be called even if there are no new events that match\nthe query.\n```\nPOST /queries/MyQuery/subscriptions\n{\n  \"dest\": \"https://client.example.com/queryCallback\",\n  \"signatureToken\": \"13df38d8275b13f05704629e5f1cf3d45d6132d5\",\n  \"reportIfEmpty\": true,\n  \"schedule\": {\n    \"hour\":\"1\",\n    \"minute\": \"5\"\n  }\n}\n```\n"
+      type: object
+      example:
+        schedule:
+          hour: '1'
+          minute: '5'
+      required:
+      - schedule
+      properties:
+        reportIfEmpty:
+          $ref: '#/components/schemas/GS1-Query-ReportIfEmpty'
+        schedule:
+          type: object
+          properties:
+            second:
+              $ref: '#/components/schemas/GS1-Query-Second'
+            minute:
+              $ref: '#/components/schemas/GS1-Query-Minute'
+            hour:
+              $ref: '#/components/schemas/GS1-Query-Hour'
+            dayOfMonth:
+              $ref: '#/components/schemas/GS1-Query-DayOfMonth'
+            month:
+              $ref: '#/components/schemas/GS1-Query-Month'
+            dayOfWeek:
+              $ref: '#/components/schemas/GS1-Query-DayOfWeek'
+    vocab-uri:
+      type: string
+      format: uri
     GS1-EPCIS-Min:
       allOf:
       - example: 1.0.0
       - $ref: '#/components/schemas/version'
-    uri:
-      type: string
-      format: uri
-    action:
-      type: string
-      enum:
-      - OBSERVE
-      - ADD
-      - DELETE
-    id:
-      type: string
-      format: uri
-    ilmd:
-      type: object
-    bizTransaction:
+    sensorReport:
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/bizTransaction-type'
-        bizTransaction:
+          $ref: '#/components/schemas/measurementType'
+        exception:
+          $ref: '#/components/schemas/sensorAlertType'
+        deviceID:
           $ref: '#/components/schemas/uri'
+        deviceMetadata:
+          $ref: '#/components/schemas/uri'
+        rawData:
+          $ref: '#/components/schemas/uri'
+        dataProcessingMethod:
+          $ref: '#/components/schemas/uri'
+        bizRules:
+          $ref: '#/components/schemas/uri'
+        time:
+          $ref: '#/components/schemas/time'
+        microorganism:
+          $ref: '#/components/schemas/uri'
+        chemicalSubstance:
+          $ref: '#/components/schemas/uri'
+        coordinateReferenceSystem:
+          $ref: '#/components/schemas/uri'
+        value:
+          $ref: '#/components/schemas/decimal'
+        component:
+          $ref: '#/components/schemas/component'
+        stringValue:
+          $ref: '#/components/schemas/string'
+        booleanValue:
+          $ref: '#/components/schemas/boolean'
+        hexBinaryValue:
+          $ref: '#/components/schemas/hexBinary'
+        uriValue:
+          $ref: '#/components/schemas/uri'
+        minValue:
+          $ref: '#/components/schemas/decimal'
+        maxValue:
+          $ref: '#/components/schemas/decimal'
+        meanValue:
+          $ref: '#/components/schemas/decimal'
+        sDev:
+          $ref: '#/components/schemas/decimal'
+        percRank:
+          $ref: '#/components/schemas/decimal'
+        percValue:
+          $ref: '#/components/schemas/decimal'
+        uom:
+          $ref: '#/components/schemas/string'
       required:
-      - bizTransaction
-      additionalProperties: false
+      - type
+    vocabulary:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/uri'
+        vocabularyElementList:
+          type: array
+          items:
+            $ref: '#/components/schemas/vocabularyElement'
+      required:
+      - type
+    id:
+      type: string
+      format: uri
+    GS1-Extensions:
+      example: 'example-epc-ext=http://org1.example.com/epcis/,
+
+        example-epc-ext2=http://vendor.example.com/epcis/
+
+        '
+      type: object
+    sensorElement:
+      type: object
+      properties:
+        sensorMetadata:
+          $ref: '#/components/schemas/sensorMetadata'
+        sensorReport:
+          $ref: '#/components/schemas/sensorReportList'
+      required:
+      - sensorReport
+    time:
+      type: string
+      format: date-time
+    NextPageToken:
+      description: 'Parameter that points to the next list of results when requesting a list of events that is larger than the value
+
+        specified with the `perPage` parameter. Some technologies refer to this as scrolling.
+
+        A `nextPageToken` may be invalidated through timeout. It is up to the specific implementation to provide
+
+        the mechanisms for invalidating tokens.
+
+        '
+      type: string
+      example: 3A15506738749783AU6D7DENAKwM2gQRRwGrataeq
+    error-reason:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-other-uri'
+      - type: string
+        enum:
+        - did_not_occur
+        - incorrect_data
+    boolean:
+      type: boolean
+    GS1-Query-DayOfWeek:
+      description: 'Specifies that the query time must have a matching day of week value. The range for this parameter is 1 through
+
+        7, inclusive, with 1 denoting Monday, 2 denoting Tuesday, and so forth, up to 7 denoting Sunday.
+
+        '
+      example: 1
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-7]))
+    GS1-Query-Min-Record-Time:
+      example: '2020-04-04T20:33:31.116-06:00'
+      description: "In the context of an active query subscription, its value is set initially to \n`initialRecordTime` and then updated to the most recent execution timestamp \nfor the standing query.\n"
+      type: string
+      format: date-time
+    persistentDisposition:
+      allOf:
+      - type: object
+        properties:
+          set:
+            type: array
+            items:
+              $ref: '#/components/schemas/disposition'
+            minItems: 1
+            uniqueItems: true
+          unset:
+            type: array
+            items:
+              $ref: '#/components/schemas/disposition'
+            minItems: 1
+            uniqueItems: true
+        additionalProperties: false
+      - anyOf:
+        - type: object
+          required:
+          - set
+        - type: object
+          required:
+          - unset
+    attribute:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/uri'
+        attribute:
+          anyOf:
+          - type: number
+          - type: string
+          - type: object
+      required:
+      - id
+    measurementType:
+      anyOf:
+      - $ref: '#/components/schemas/vocab-nonGS1WebVoc-uri'
+      - type: string
+        enum:
+        - AbsoluteHumidity
+        - AbsorbedDose
+        - AbsorbedDoseRate
+        - Acceleration
+        - Radioactivity
+        - Altitude
+        - AmountOfSubstance
+        - AmountOfSubstancePerUnitVolume
+        - Angle
+        - AngularAcceleration
+        - AngularMomentum
+        - AngularVelocity
+        - Area
+        - Capacitance
+        - Conductance
+        - Conductivity
+        - Count
+        - Density
+        - Dimensionless
+        - DoseEquivalent
+        - DoseEquivalentRate
+        - DynamicViscosity
+        - ElectricCharge
+        - ElectricCurrent
+        - ElectricCurrentDensity
+        - ElectricFieldStrength
+        - Energy
+        - Exposure
+        - Force
+        - Frequency
+        - Illuminance
+        - Inductance
+        - Irradiance
+        - KinematicViscosity
+        - Length
+        - LinearMomentum
+        - Luminance
+        - LuminousFlux
+        - LuminousIntensity
+        - MagneticFlux
+        - MagneticFluxDensity
+        - MagneticVectorPotential
+        - Mass
+        - MassConcentration
+        - MassFlowRate
+        - MassPerAreaTime
+        - MemoryCapacity
+        - MolalityOfSolute
+        - MolarEnergy
+        - MolarMass
+        - MolarVolume
+        - Power
+        - Pressure
+        - RadiantFlux
+        - RadiantIntensity
+        - RelativeHumidity
+        - Resistance
+        - Resistivity
+        - SolidAngle
+        - SpecificVolume
+        - Speed
+        - SurfaceDensity
+        - SurfaceTension
+        - Temperature
+        - Time
+        - Torque
+        - Voltage
+        - Volume
+        - VolumeFlowRate
+        - VolumeFraction
+        - VolumetricFlux
+        - Wavenumber
+    GS1-Query-Second:
+      description: 'Specifies that the query time must have a matching seconds value. The range for this parameter is 0
+
+        through 59, inclusive.
+
+        '
+      example: 0
+      type: string
+      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-59]))
+    GS1-EPCIS-Max:
+      allOf:
+      - example: 2.0.1
+      - $ref: '#/components/schemas/version'
     ObjectEvent:
       allOf:
       - $ref: '#/components/schemas/Event'
@@ -1294,409 +1676,62 @@ components:
             action:
               type: string
               pattern: ^ADD$
-    vocabulary:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/uri'
-        vocabularyElementList:
-          type: array
-          items:
-            $ref: '#/components/schemas/vocabularyElement'
-      required:
-      - type
-    eventList:
-      type: array
-      items:
-        $ref: '#/components/schemas/EPCISEvent'
-    resultsBody:
-      type: object
-      properties:
-        eventList:
-          $ref: '#/components/schemas/eventList'
-        vocabularyList:
-          $ref: '#/components/schemas/vocabularyList'
-      required:
-      - eventList
-    GS1-EPCIS-Max:
-      allOf:
-      - example: 2.0.1
-      - $ref: '#/components/schemas/version'
-    GS1-EPCIS-Version:
-      allOf:
-      - example: 2.0.1
-      - $ref: '#/components/schemas/version'
-    epcisQueryDocument:
-      type: object
-      properties:
-        '@context':
-          $ref: '#/components/schemas/LDContext'
-        id:
-          $ref: '#/components/schemas/id'
-        type:
-          type: string
-          enum:
-          - EPCISQueryDocument
-        schemaVersion:
-          $ref: '#/components/schemas/version'
-        creationDate:
-          $ref: '#/components/schemas/time'
-        epcisBody:
-          $ref: '#/components/schemas/epcisQueryDocumentBody'
-      required:
-      - '@context'
-      - type
-      - epcisBody
-    string:
-      type: string
-    hexBinary:
-      type: string
-      pattern: ^[A-Fa-f0-9]+$
-    epcList:
-      type: array
-      items:
-        $ref: '#/components/schemas/uri'
-      uniqueItems: true
-    Link:
-      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
-
-        parameters.
-
-        '
-      type: string
-      format: uri
-      example: <https://example.com/epcis/events?perPage=30&nextPageToken=3A15506738749783AU6D7DENAKwM2gQRRwGrataeq>; rel="next"
-    GS1-Query-DayOfWeek:
-      description: 'Specifies that the query time must have a matching day of week value. The range for this parameter is 1 through
-
-        7, inclusive, with 1 denoting Monday, 2 denoting Tuesday, and so forth, up to 7 denoting Sunday.
-
-        '
-      example: 1
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-7]))
-    GS1-CBV-XML-Format:
-      example: Always_Web_URI
-      type: string
-      enum:
-      - No_Preference
-      - Always_Web_URI
-      - Always_URN
-      - Never_Translates
-    source-dest-type:
-      anyOf:
-      - $ref: '#/components/schemas/vocab-other-uri'
-      - type: string
-        enum:
-        - owning_party
-        - possessing_party
-        - location
-    persistentDisposition:
-      allOf:
-      - type: object
-        properties:
-          set:
-            type: array
-            items:
-              $ref: '#/components/schemas/disposition'
-            minItems: 1
-            uniqueItems: true
-          unset:
-            type: array
-            items:
-              $ref: '#/components/schemas/disposition'
-            minItems: 1
-            uniqueItems: true
-        additionalProperties: false
-      - anyOf:
-        - type: object
-          required:
-          - set
-        - type: object
-          required:
-          - unset
-    sensorReportList:
-      type: array
-      items:
-        $ref: '#/components/schemas/sensorReport'
-      minItems: 1
-    destination:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/source-dest-type'
-        destination:
-          $ref: '#/components/schemas/uri'
-      required:
-      - type
-      - destination
-      additionalProperties: false
-    vocab-other-uri:
-      type: string
-      format: uri
-      pattern: ^(?!(urn:epcglobal:cbv|https?:\/\/ns\.gs1\.org/cbv\/))
-    subscriptionID:
-      description: The ID of a WebHook subscription.
-      example: df5a33e3-5aa3-4403-ae01-99b83234e27b
-      type: string
-    boolean:
-      type: boolean
-    GS1-Query-Month:
-      description: 'Specifies that the query time must have a matching month value. The range for this parameter is 1 through 12,
-
-        inclusive.
-
-        '
-      example: 1
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-12]))
-    GS1-Query-DayOfMonth:
-      description: 'Specifies that the query time must have a matching day of month value. The range for this parameter is 1 through
-
-        31, inclusive.
-
-        '
-      example: 1
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([1-31]))
-    quantityElement:
-      type: object
-      properties:
-        epcClass:
-          $ref: '#/components/schemas/uri'
-        quantity:
-          $ref: '#/components/schemas/decimal'
-        uom:
-          $ref: '#/components/schemas/uom'
-      required:
-      - epcClass
-      additionalProperties: false
-    EPCISEvent:
-      description: "EPCIS Event. It must validate against the normative \n<a href=\"../epcis-json-schema.json\">EPCIS JSON Schema</a> or <a href=\"../Ontology/EPCIS-SHACL.ttl\">EPCIS SHACL</a>. \n"
-      oneOf:
-      - $ref: '#/components/schemas/ObjectEvent'
-      - $ref: '#/components/schemas/AggregationEvent'
-      - $ref: '#/components/schemas/TransactionEvent'
-      - $ref: '#/components/schemas/TransformationEvent'
-      - $ref: '#/components/schemas/AssociationEvent'
-      - $ref: '#/components/schemas/Extended-Event'
-    GS1-Query-ReportIfEmpty:
-      example: false
-      type: boolean
-      default: false
-      description: Flag to specify subscribed clients should be notified if the query result is empty.
-    sensorMetadata:
-      type: object
-      properties:
-        time:
-          $ref: '#/components/schemas/time'
-        deviceID:
-          $ref: '#/components/schemas/uri'
-        deviceMetadata:
-          $ref: '#/components/schemas/uri'
-        rawData:
-          $ref: '#/components/schemas/uri'
-        startTime:
-          $ref: '#/components/schemas/time'
-        endTime:
-          $ref: '#/components/schemas/time'
-        dataProcessingMethod:
-          $ref: '#/components/schemas/uri'
-        bizRules:
-          $ref: '#/components/schemas/uri'
-    epcisQueryDocumentBody:
-      type: object
-      properties:
-        queryResults:
-          $ref: '#/components/schemas/queryResults'
-      required:
-      - queryResults
-    measurementType:
+    sensorAlertType:
       anyOf:
       - $ref: '#/components/schemas/vocab-nonGS1WebVoc-uri'
       - type: string
         enum:
-        - AbsoluteHumidity
-        - AbsorbedDose
-        - AbsorbedDoseRate
-        - Acceleration
-        - Radioactivity
-        - Altitude
-        - AmountOfSubstance
-        - AmountOfSubstancePerUnitVolume
-        - Angle
-        - AngularAcceleration
-        - AngularMomentum
-        - AngularVelocity
-        - Area
-        - Capacitance
-        - Conductance
-        - Conductivity
-        - Count
-        - Density
-        - Dimensionless
-        - DoseEquivalent
-        - DoseEquivalentRate
-        - DynamicViscosity
-        - ElectricCharge
-        - ElectricCurrent
-        - ElectricCurrentDensity
-        - ElectricFieldStrength
-        - Energy
-        - Exposure
-        - Force
-        - Frequency
-        - Illuminance
-        - Inductance
-        - Irradiance
-        - KinematicViscosity
-        - Length
-        - LinearMomentum
-        - Luminance
-        - LuminousFlux
-        - LuminousIntensity
-        - MagneticFlux
-        - MagneticFluxDensity
-        - MagneticVectorPotential
-        - Mass
-        - MassConcentration
-        - MassFlowRate
-        - MassPerAreaTime
-        - MemoryCapacity
-        - MolalityOfSolute
-        - MolarEnergy
-        - MolarMass
-        - MolarVolume
-        - Power
-        - Pressure
-        - RadiantFlux
-        - RadiantIntensity
-        - RelativeHumidity
-        - Resistance
-        - Resistivity
-        - SolidAngle
-        - SpecificVolume
-        - Speed
-        - SurfaceDensity
-        - SurfaceTension
-        - Temperature
-        - Time
-        - Torque
-        - Voltage
-        - Volume
-        - VolumeFlowRate
-        - VolumeFraction
-        - VolumetricFlux
-        - Wavenumber
-    GS1-Query-Min-Record-Time:
-      example: '2020-04-04T20:33:31.116-06:00'
-      description: "In the context of an active query subscription, its value is set initially to \n`initialRecordTime` and then updated to the most recent execution timestamp \nfor the standing query.\n"
-      type: string
-      format: date-time
-    GS1-Signature:
-      description: "Used to sign events sent by the repository to subscribers. The choice of signature type is implementation specific but examples would be using HMAC with SHA-256 directly or a wrapper supporting various symmetric or asymetric \ncryptographic algorithms such as Json Web Signature (JWS). \n"
-      type: string
-      example: eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFtcGxlLmNvbS9pc19yb290Ijp0cnVlfQ
-    AbstractQuerySubscription:
-      example:
-        dest: https://client.example.com/queryCallback
-        signatureToken: 13df38d8275b13f05704629e5f1cf3d45d6132d5
-      type: object
-      description: 'This schema contains shared features of EPCIS query subscriptions. If the schema is used in a response, the
-
-        `secret` should not be fully revealed.
-
-        '
-      required:
-      - dest
-      - secret
-      properties:
-        dest:
-          $ref: '#/components/schemas/dest'
-        signatureToken:
-          example: 13df38d8275b13f05704629e5f1cf3d45d6132d5
-          type: string
-          description: Secret generated by the client for the server.
-        initialRecordTime:
-          $ref: '#/components/schemas/GS1-Query-InitialRecordTime'
-    GS1-Query-Minute:
-      description: 'Specifies that the query time must have a matching minute value. The range for this parameter is 0 through 59,
-
-        inclusive.
-
-        '
-      example: 5
-      type: string
-      pattern: (\g<element>,)*\g<element>|(?<element>(\g<number>|\g<range>))|(?<range>(\[\g<number>\-\g<number>\]))|(?<number>([0-59]))
-    sensorReport:
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/measurementType'
-        exception:
-          $ref: '#/components/schemas/sensorAlertType'
-        deviceID:
-          $ref: '#/components/schemas/uri'
-        deviceMetadata:
-          $ref: '#/components/schemas/uri'
-        rawData:
-          $ref: '#/components/schemas/uri'
-        dataProcessingMethod:
-          $ref: '#/components/schemas/uri'
-        bizRules:
-          $ref: '#/components/schemas/uri'
-        time:
-          $ref: '#/components/schemas/time'
-        microorganism:
-          $ref: '#/components/schemas/uri'
-        chemicalSubstance:
-          $ref: '#/components/schemas/uri'
-        coordinateReferenceSystem:
-          $ref: '#/components/schemas/uri'
-        value:
-          $ref: '#/components/schemas/decimal'
-        component:
-          $ref: '#/components/schemas/component'
-        stringValue:
-          $ref: '#/components/schemas/string'
-        booleanValue:
-          $ref: '#/components/schemas/boolean'
-        hexBinaryValue:
-          $ref: '#/components/schemas/hexBinary'
-        uriValue:
-          $ref: '#/components/schemas/uri'
-        minValue:
-          $ref: '#/components/schemas/decimal'
-        maxValue:
-          $ref: '#/components/schemas/decimal'
-        meanValue:
-          $ref: '#/components/schemas/decimal'
-        sDev:
-          $ref: '#/components/schemas/decimal'
-        percRank:
-          $ref: '#/components/schemas/decimal'
-        percValue:
-          $ref: '#/components/schemas/decimal'
-        uom:
-          $ref: '#/components/schemas/string'
-      required:
-      - type
-    vocabularyElement:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/uri'
-        attributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/attribute'
-        children:
-          type: array
-          items:
-            $ref: '#/components/schemas/uri'
-      required:
-      - id
+        - ALARM_CONDITION
+        - ERROR_CONDITION
+    Extended-Event:
+      allOf:
+      - $ref: '#/components/schemas/Event'
+      - type: object
+        properties:
+          type:
+            $ref: '#/components/schemas/vocab-uri'
+        required:
+        - type
+    GS1-EPCIS-Version:
+      allOf:
+      - example: 2.0.1
+      - $ref: '#/components/schemas/version'
   parameters:
+    GS1-EPCIS-Max:
+      in: header
+      name: GS1-EPCIS-Max
+      description: The highest EPCIS version supported.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Max'
+    NextPageToken:
+      in: query
+      name: nextPageToken
+      schema:
+        $ref: '#/components/schemas/NextPageToken'
+    GS1-Signature:
+      in: header
+      name: GS1-Signature
+      description: Header containing the signature of events sent by the respository to a subscriber.
+      required: false
+      schema:
+        $ref: '#/components/schemas/GS1-Signature'
+    QueryName:
+      in: path
+      name: queryName
+      description: The name of an EPCIS event query.
+      required: true
+      schema:
+        $ref: '#/components/schemas/QueryName'
+    GS1-Extensions:
+      in: header
+      name: GS1-Extensions
+      description: 'Specific EPCIS or CBV extensions supported (e.g., for FIT).
+
+        '
+      schema:
+        $ref: '#/components/schemas/GS1-Extensions'
+      style: simple
+      explode: true
     GS1-EPCIS-Version:
       in: header
       name: GS1-EPCIS-Version
@@ -1713,22 +1748,12 @@ components:
         '
       schema:
         $ref: '#/components/schemas/GS1-EPCIS-Min'
-    PerPage:
-      in: query
-      name: perPage
-      schema:
-        $ref: '#/components/schemas/PerPage'
-    NextPageToken:
-      in: query
-      name: nextPageToken
-      schema:
-        $ref: '#/components/schemas/NextPageToken'
-    GS1-EPCIS-Max:
+    GS1-EPC-Format:
       in: header
-      name: GS1-EPCIS-Max
-      description: The highest EPCIS version supported.
+      name: GS1-EPC-Format
+      description: "Header used by the client to indicate whether EPCs are expressed as GS1 Digital Link URIs or as EPC URNs.\nIt is also used by the server to announce which EPC formats are supported. \nIf absent the default value is `Always_GS1_Digital_Link`:\n - No_Preference: No preference in the representation, i.e. any format is accepted.\n - Always_GS1_Digital_Link: URIs are returned as GS1 Digital Link.\n - Always_EPC_URN: URIs are returned as URN.\n - Never_Translates: EPCs are never translated, i.e. the original format is kept.\n"
       schema:
-        $ref: '#/components/schemas/GS1-EPCIS-Max'
+        $ref: '#/components/schemas/GS1-EPC-Format'
     GS1-CBV-XML-Format:
       in: header
       name: GS1-CBV-XML-Format
@@ -1749,120 +1774,77 @@ components:
         '
       schema:
         $ref: '#/components/schemas/GS1-CBV-XML-Format'
-    GS1-EPC-Format:
-      in: header
-      name: GS1-EPC-Format
-      description: "Header used by the client to indicate whether EPCs are expressed as GS1 Digital Link URIs or as EPC URNs.\nIt is also used by the server to announce which EPC formats are supported. \nIf absent the default value is `Always_GS1_Digital_Link`:\n - No_Preference: No preference in the representation, i.e. any format is accepted.\n - Always_GS1_Digital_Link: URIs are returned as GS1 Digital Link.\n - Always_EPC_URN: URIs are returned as URN.\n - Never_Translates: EPCs are never translated, i.e. the original format is kept.\n"
+    PerPage:
+      in: query
+      name: perPage
       schema:
-        $ref: '#/components/schemas/GS1-EPC-Format'
-    GS1-Extensions:
-      in: header
-      name: GS1-Extensions
-      description: 'Specific EPCIS or CBV extensions supported (e.g., for FIT).
+        $ref: '#/components/schemas/PerPage'
+  headers:
+    GS1-EPCIS-Version:
+      description: The EPCIS version.
+      schema:
+        $ref: '#/components/schemas/GS1-EPCIS-Version'
+    GS1-Next-Page-Token-Expires:
+      description: The expiry time for `nextPageToken`.
+      schema:
+        $ref: '#/components/schemas/GS1-Next-Page-Token-Expires'
+    Link:
+      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
+
+        parameters.
+
+        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
+
+        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`.
 
         '
       schema:
+        $ref: '#/components/schemas/Link'
+    GS1-Extensions:
+      description: Specific EPCIS or CBV extensions supported (e.g., for FIT).
+      schema:
         $ref: '#/components/schemas/GS1-Extensions'
-      style: simple
-      explode: true
-    QueryName:
-      in: path
-      name: queryName
-      description: The name of an EPCIS event query.
-      required: true
-      schema:
-        $ref: '#/components/schemas/QueryName'
-    GS1-Signature:
-      in: header
-      name: GS1-Signature
-      description: Header containing the signature of events sent by the respository to a subscriber.
-      required: false
-      schema:
-        $ref: '#/components/schemas/GS1-Signature'
   responses:
-    400SubscriptionIssues:
-      description: An issue with a subscription occurred.
-      content:
-        application/json:
-          schema:
-            example:
-              type: epcisException:SubscriptionControlsException
-              title: Subscription error
-              status: 400
-            allOf:
-            - properties:
-                status:
-                  type: integer
-                  enum:
-                  - 400
-                  default: 400
-                type:
-                  type: string
-                  format: uri
-                  enum:
-                  - epcisException:SubscriptionControlsException
-                  - epcisException:ValidationException
-            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-        application/xml:
-          schema:
-            example:
-              type: epcisException:SubscriptionControlsException
-              title: Subscription error
-              status: 400
-            allOf:
-            - properties:
-                status:
-                  type: integer
-                  enum:
-                  - 400
-                  default: 400
-                type:
-                  type: string
-                  format: uri
-                  enum:
-                  - epcisException:SubscriptionControlsException
-                  - epcisException:ValidationException
-            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-    403ClientUnauthorized:
-      description: Client is unauthorized to access this resource.
+    404ResourceNotFound:
+      description: At least one resource was not found. For example, the EPCIS event does not exist or the query does not exist.
       content:
         application/problem+json:
           schema:
             example:
-              type: epcisException:SecurityException
-              title: Access to resource forbidden
-              status: 403
+              type: epcisException:NoSuchResourceException
+              title: Resource not found
+              status: 404
             allOf:
             - properties:
                 status:
                   type: integer
                   enum:
-                  - 403
-                  default: 403
+                  - 404
+                  default: 404
                 type:
                   type: string
                   format: uri
                   enum:
-                  - epcisException:SecurityException
+                  - epcisException:NoSuchNameException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
         application/problem+xml:
           schema:
             example:
-              type: epcisException:SecurityException
-              title: Access to resource forbidden
-              status: 403
+              type: epcisException:NoSuchNameException
+              title: Resource not found
+              status: 404
             allOf:
             - properties:
                 status:
                   type: integer
                   enum:
-                  - 403
-                  default: 403
+                  - 404
+                  default: 404
                 type:
                   type: string
                   format: uri
                   enum:
-                  - epcisException:SecurityException
+                  - epcisException:NoSuchNameException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
     415UnsupportedMediaType:
       description: 'The client sent data in a format that is not supported by the server.
@@ -1907,6 +1889,47 @@ components:
                   enum:
                   - epcisException:IUnsupportedMediaTypeException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+    401UnauthorizedRequest:
+      description: Authorization information is missing or invalid.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Unauthorised request
+              status: 401
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 401
+                  default: 401
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Unauthorised request
+              status: 401
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 401
+                  default: 401
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
     406NotAcceptable:
       description: "The server cannot return the response as requested. \n"
       content:
@@ -1948,87 +1971,48 @@ components:
                   enum:
                   - epcisException:NotAcceptableException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-    404ResourceNotFound:
-      description: At least one resource was not found. For example, the EPCIS event does not exist or the query does not exist.
+    400SubscriptionIssues:
+      description: An issue with a subscription occurred.
       content:
-        application/problem+json:
+        application/json:
           schema:
             example:
-              type: epcisException:NoSuchResourceException
-              title: Resource not found
-              status: 404
+              type: epcisException:SubscriptionControlsException
+              title: Subscription error
+              status: 400
             allOf:
             - properties:
                 status:
                   type: integer
                   enum:
-                  - 404
-                  default: 404
+                  - 400
+                  default: 400
                 type:
                   type: string
                   format: uri
                   enum:
-                  - epcisException:NoSuchNameException
+                  - epcisException:SubscriptionControlsException
+                  - epcisException:ValidationException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-        application/problem+xml:
+        application/xml:
           schema:
             example:
-              type: epcisException:NoSuchNameException
-              title: Resource not found
-              status: 404
+              type: epcisException:SubscriptionControlsException
+              title: Subscription error
+              status: 400
             allOf:
             - properties:
                 status:
                   type: integer
                   enum:
-                  - 404
-                  default: 404
+                  - 400
+                  default: 400
                 type:
                   type: string
                   format: uri
                   enum:
-                  - epcisException:NoSuchNameException
-            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-    401UnauthorizedRequest:
-      description: Authorization information is missing or invalid.
-      content:
-        application/problem+json:
-          schema:
-            example:
-              type: epcisException:SecurityException
-              title: Unauthorised request
-              status: 401
-            allOf:
-            - properties:
-                status:
-                  type: integer
-                  enum:
-                  - 401
-                  default: 401
-                type:
-                  type: string
-                  format: uri
-                  enum:
-                  - epcisException:SecurityException
-            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-        application/problem+xml:
-          schema:
-            example:
-              type: epcisException:SecurityException
-              title: Unauthorised request
-              status: 401
-            allOf:
-            - properties:
-                status:
-                  type: integer
-                  enum:
-                  - 401
-                  default: 401
-                type:
-                  type: string
-                  format: uri
-                  enum:
-                  - epcisException:SecurityException
+                  - epcisException:SubscriptionControlsException
+                  - epcisException:ValidationException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
     500ImplementationException:
       description: An error occurred on the backend.
@@ -2071,28 +2055,44 @@ components:
                   enum:
                   - epcisException:ImplementationException
             - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
-  headers:
-    Link:
-      description: 'A pagination header link. This header works together with the `perPage` and `nextPageToken` query string
-
-        parameters.
-
-        As long as there are more resources to retrieve, the `Link` header contains the URL of the next page and
-
-        the attribute `rel="next"`. The last page is indicated by the absence of the `rel="next"`.
-
-        '
-      schema:
-        $ref: '#/components/schemas/Link'
-    GS1-Extensions:
-      description: Specific EPCIS or CBV extensions supported (e.g., for FIT).
-      schema:
-        $ref: '#/components/schemas/GS1-Extensions'
-    GS1-Next-Page-Token-Expires:
-      description: The expiry time for `nextPageToken`.
-      schema:
-        $ref: '#/components/schemas/GS1-Next-Page-Token-Expires'
-    GS1-EPCIS-Version:
-      description: The EPCIS version.
-      schema:
-        $ref: '#/components/schemas/GS1-EPCIS-Version'
+    403ClientUnauthorized:
+      description: Client is unauthorized to access this resource.
+      content:
+        application/problem+json:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Access to resource forbidden
+              status: 403
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 403
+                  default: 403
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
+        application/problem+xml:
+          schema:
+            example:
+              type: epcisException:SecurityException
+              title: Access to resource forbidden
+              status: 403
+            allOf:
+            - properties:
+                status:
+                  type: integer
+                  enum:
+                  - 403
+                  default: 403
+                type:
+                  type: string
+                  format: uri
+                  enum:
+                  - epcisException:SecurityException
+            - $ref: '#/components/schemas/RFC7807ProblemResponseBody'
