@@ -1,0 +1,49 @@
+edges:
+- partner_name: GLEIF (LEI issuer accreditation)
+  partner: null
+  partner_match: register
+  type: register
+  channel: standard-directory
+  relationship: standard-participant
+  direction: partner-built
+  evidence: https://api.gleif.org/api/v1/lei-issuers/52990034RLKT0WSOAM90
+  category: accredited LEI issuer
+  contract_reference:
+    register: GLEIF accredited LEI issuers (api.gleif.org/api/v1/lei-issuers)
+    standard: ISO 17442 Legal Entity Identifier (GLEIF LOU accreditation)
+    spec_file: null
+    role: lei-issuer
+    registered_name: GS1
+    register_id: 52990034RLKT0WSOAM90
+    register_url: https://www.lei.direct/
+    matched_domain: gs1.org
+    matched_by: domain
+    certified_products:
+    - product: Accredited LEI Issuer (Local Operating Unit)
+      product_type: LEI issuance service
+      standard: ISO 17442 Legal Entity Identifier (GLEIF LOU accreditation)
+      lapsed: false
+      accreditation_date: '2017-02-22'
+    signal_note: 'certified_products = ONE entry: GLEIF accreditation of the LEI issuing organisation (conformance
+      to ISO 17442 and the GLEIF Master Agreement, reviewed annually); the API lists current issuers only, so lapsed
+      issuers are absent, not flagged'
+    detected_by: sweep-gleif-lei-issuers.py
+    detected: '2026-10-22'
+    identity: wikidata Q731100 P1278 LEI 52990034RLKT0WSOAM90 P856 http://www.gs1.org/
+    identity_source: wikidata P1278 (the register's LEI) -> P856, labelled
+  detected_by: sweep-gleif-lei-issuers.py
+  first_seen: '2026-10-22'
+generated: '2026-10-22'
+method: searched
+source:
+- https://api.gleif.org/api/v1/lei-issuers
+- https://api.gleif.org/api/v1/vlei-issuers
+- https://api.gleif.org/api/v1/registration-authorities
+- https://api.gleif.org/api/v1/registration-agents
+- https://www.gleif.org/en/lei-solutions/validation-agents
+checked:
+- https://api.gleif.org/api/v1/lei-issuers
+- https://api.gleif.org/api/v1/registration-agents
+- https://api.gleif.org/api/v1/registration-authorities
+- https://api.gleif.org/api/v1/vlei-issuers
+- https://www.gleif.org/en/lei-solutions/validation-agents
